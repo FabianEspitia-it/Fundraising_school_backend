@@ -6,13 +6,15 @@ from sqlalchemy.orm import Session
 from src.database import SessionLocal, engine
 from src import models
 
-models.Base.metadata.create_all(bind=engine)
-
 from src.users.schemas import ValidUserReq, User
 from src.users.crud import get_email
 
+from src.users.linkedin_data import get_user_data
+
 
 user = APIRouter()
+
+models.Base.metadata.create_all(bind=engine)
 
 def get_db():
     db = SessionLocal()
@@ -33,9 +35,7 @@ def user_validate(valid_user_req: ValidUserReq, db: Session = Depends(get_db)) -
     return JSONResponse(content={"response": response}, status_code=status.HTTP_200_OK)
 
 
-@user.get("/new/user")
-def new_user(new_user: User):
-    # TODO: Insert request data in the database
+@user.post("/new/user", tags=["users"])
+def new_user(new_user: ValidUserReq):
 
-    queue.enqueue(new_user.email)
-    return
+    return JSONResponse(content=get_user_data(new_user.email), status_code=status.HTTP_200_OK)

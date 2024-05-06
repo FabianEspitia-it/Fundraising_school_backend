@@ -1,8 +1,8 @@
 import requests
 import json
-from constants import URL_API, API_KEY
+from src.users.constants import URL_API, API_KEY
 
-def get_user_data(email: str) -> None:
+def get_user_data(email: str):
 
     querystring = {f"apikey": {API_KEY}, "email": {email}}
 
@@ -12,5 +12,4 @@ def get_user_data(email: str) -> None:
 
     json_str = json.dumps(json_object, indent=4)
 
-    print(json_str)
-    return None
+    return json_object
