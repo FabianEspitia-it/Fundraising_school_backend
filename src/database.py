@@ -7,8 +7,10 @@ import os
 
 load_dotenv()
 
-engine = create_engine(os.getenv("DATABASE_URL"))
 
-session_local = sessionmaker(autocommit = False, autoflush=False, bind=engine)
+SQLALCHEMY_DATABASE_URL = "mysql+pymysql://root:12345@localhost:3306/fundraising_school"
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
