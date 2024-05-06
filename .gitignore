@@ -1,0 +1,40 @@
+.env*
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caching directories
+.cache/
+.dist/
+.venv/
+.vscode/
+
+# Environment
+.env
+.pyenv/
+
+# Distribution / packaging
+build/
+dist/
+
+# Python egg metadata
+*.egg-info/
+
+# Compiled Python files
+*.pyc
+*.pyo
+
+# IDE files
+.idea/
+.vscode/
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Other
+.DS_Store
+thumbs.db
