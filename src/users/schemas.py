@@ -5,6 +5,11 @@ from datetime import datetime
 class ValidUserReq(BaseModel):
     email: str
 
+class NewUserReq(BaseModel):
+    name : str
+    email: str
+    linkedin_picture : str
+
 class ValidUserRes(BaseModel):
     is_user_saved: bool
     error: str | None = None
@@ -14,10 +19,12 @@ class NewUserRes(BaseModel):
     error: str | None = None
 
 
-class User(ValidUserReq):
+# BD SCHEMAS 
+
+
+class User(BaseModel):
     id: int
-    first_name : str
-    last_name : str
+    name : str
     followers_amount : int
     linkedin_url : str
     location : str
@@ -31,6 +38,7 @@ class User(ValidUserReq):
 
     class Config:
         orm_mode = True
+
 
 class Round(BaseModel):
     id: int
