@@ -3,25 +3,15 @@ from fastapi.responses import JSONResponse
 
 from sqlalchemy.orm import Session
 
-from src.database import SessionLocal, engine
-from src import models
+from src.database import get_db
+
 
 from src.users.schemas import ValidUserReq, User
 from src.users.crud import get_email
-
 from src.users.linkedin_data import get_user_data
 
 
 user = APIRouter()
-
-models.Base.metadata.create_all(bind=engine)
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @user.post("/user/validate", tags=["users"])

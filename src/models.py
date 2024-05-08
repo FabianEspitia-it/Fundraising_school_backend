@@ -68,6 +68,6 @@ class Job(Base):
     user = relationship("User", back_populates="job")
 
 
-
+Base.metadata.create_all(bind=engine)
 
 
