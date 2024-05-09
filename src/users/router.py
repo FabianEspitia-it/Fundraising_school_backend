@@ -27,7 +27,7 @@ def user_validate(valid_user_req: ValidUserReq, db: Session = Depends(get_db)) -
 @user.post("/user/new", tags=["users"])
 def new_user(new_user: NewUserReq, background_tasks: BackgroundTasks,  db: Session = Depends(get_db)):
 
-    create_user(db = db, email=new_user.email, name=new_user.name, photo_url=new_user.linkedin_picture)
-    background_tasks.add_task(linkedin_data, full_name = new_user.name)
+    background_tasks.add_task(create_user, db = db, email=new_user.email, name=new_user.name, photo_url=new_user.linkedin_picture)
+    #background_tasks.add_task(linkedin_data, full_name = new_user.name)
     
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
