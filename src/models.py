@@ -21,7 +21,7 @@ class User(Base):
     followers_amount = Column(Integer, nullable=False, default=0)
     linkedin_url = Column(String(255), nullable=False, unique=True)
     location = Column(String(255), nullable=True)
-    seeking_capital = Column(Boolean, nullable=False, default=False)
+    seeking_capital = Column(Boolean, nullable=True)
     photo_url = Column(String(255), nullable=False, unique=True)
     created_at = Column(DateTime, nullable=False, default=func.now())
     updated_at = Column(DateTime, nullable=False, default=func.now(), onupdate=func.now())

@@ -4,7 +4,6 @@ from selenium import webdriver
 
 from src.users.constants import SEARCH_URL
 
-SEARCH_URL = "https://www.google.com/search"
 
 def create_driver():
     options = webdriver.ChromeOptions()
@@ -30,6 +29,7 @@ def search_linkedin_url(name: str) -> str:
     else:
         return None
 
+
 def convert_linkedin_url(url) -> str:
     linkedin_path = "/in/"
     path_index = url.find(linkedin_path)
@@ -39,6 +39,7 @@ def convert_linkedin_url(url) -> str:
         return new_url
     else:
         return None
+
 
 def get_linkedin_profile(url: str) -> dict:
     global driver
@@ -50,6 +51,7 @@ def get_linkedin_profile(url: str) -> dict:
     followers_amount = ''.join([char for char in general_info[2].text.strip() if char.isdigit()])
     education_items = [item.text.strip() for item in soup.select(".education__list-item")]
     return {'location': location, 'followers_amount': followers_amount, 'education_items': education_items}
+
 
 def linkedin_data(full_name: str):
     linkedin_url = search_linkedin_url(full_name)

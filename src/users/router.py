@@ -9,6 +9,8 @@ from src.users.schemas import ValidUserReq, NewUserReq
 from src.users.crud import *
 from src.users.linkedin_data import linkedin_data
 
+from src.utils.validations import check_email
+
 
 user = APIRouter()
 
