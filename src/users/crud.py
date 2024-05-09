@@ -1,3 +1,5 @@
+import re
+
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
@@ -10,6 +12,11 @@ from src.users.linkedin_data import linkedin_data
 
 def get_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
+
+
+def check_email(person_email):
+    regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(regex, person_email)
 
 
 def create_user(db: Session, email: str, name: str, photo_url: str):
