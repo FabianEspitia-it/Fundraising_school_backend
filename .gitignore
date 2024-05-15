@@ -11,9 +11,12 @@ __pycache__/
 .venv/
 .vscode/
 
-# Environment
-.env
-.pyenv/
+# Virtual environment
+venv/
+env/
+*.pyc
+*.pyo
+*.pyd
 
 # Distribution / packaging
 build/

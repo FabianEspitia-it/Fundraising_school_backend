@@ -1,1 +1,1 @@
-# Fundraising_school_backend
+# Fundraising School Backend
