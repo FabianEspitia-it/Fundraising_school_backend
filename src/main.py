@@ -1,6 +1,8 @@
+import os
+import uvicorn
 from fastapi import FastAPI
-from.users.router import user
-
+from src.users.router import user
+from dotenv import load_dotenv
 
 app = FastAPI()
 
@@ -8,5 +10,12 @@ app.title = "Fundraising School API"
 
 app.include_router(user)
 
+if __name__ == "__main__":
+    load_dotenv()
 
+    port = os.getenv("PORT")
 
+    if not port:
+        port = 8080
+
+    uvicorn.run(app, host="0.0.0.0", port=int(port))

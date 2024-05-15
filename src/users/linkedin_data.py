@@ -1,19 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
 
 from src.users.constants import SEARCH_URL
 
 
-def create_driver():
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")
-    driver = webdriver.Chrome(options)
-    return driver
-
-driver = create_driver()
-
-def search_linkedin_url(name: str) -> str:
+def search_linkedin_url(name: str) -> str | None:
     search = f"site:linkedin.com {name}"
     headers = {
         'Accept': '*/*',
@@ -30,7 +21,7 @@ def search_linkedin_url(name: str) -> str:
         return None
 
 
-def convert_linkedin_url(url) -> str:
+def convert_linkedin_url(url) -> str | None:
     linkedin_path = "/in/"
     path_index = url.find(linkedin_path)
     if path_index != -1:
@@ -42,31 +33,21 @@ def convert_linkedin_url(url) -> str:
 
 
 def get_linkedin_profile(url: str) -> dict:
-    global driver
-    driver.get(url)
-    page_source = driver.page_source
-    soup = BeautifulSoup(page_source, 'html.parser')
-    general_info = soup.select('.not-first-middot span')
-    location = general_info[0].text.strip()
-    followers_amount = ''.join([char for char in general_info[2].text.strip() if char.isdigit()])
-    education_items = [item.text.strip() for item in soup.select(".education__list-item")]
-    return {'location': location, 'followers_amount': followers_amount, 'education_items': education_items}
+
+
+    return {}
 
 
 def linkedin_data(full_name: str):
     linkedin_url = search_linkedin_url(full_name)
     if not linkedin_url:
         return None
+
     user_linkedin_url = convert_linkedin_url(linkedin_url)
     if not user_linkedin_url:
         return None
+
     profile_data = get_linkedin_profile(user_linkedin_url)
     profile_data["linkedin_url"] = user_linkedin_url
-    
+
     return profile_data
-
-
-
-    
-
-    

@@ -1,13 +1,7 @@
-import re
-
 from sqlalchemy.orm import Session
-from sqlalchemy.sql import func
-
-import src.models as models
-
-from src.users.schemas import NewUserReq
 from src.users.linkedin_data import linkedin_data
 
+import src.models as models
 
 
 def get_email(db: Session, email: str):
@@ -15,18 +9,15 @@ def get_email(db: Session, email: str):
 
 
 def create_user(db: Session, email: str, name: str, photo_url: str):
+    user_data = linkedin_data(full_name=name)
 
-    user_data = linkedin_data(full_name = name)
-
-    db_user = models.User(email=email, 
-                          name= name, 
-                          photo_url = photo_url,
-                          linkedin_url = user_data["linkedin_url"],
-                          followers_amount = user_data["followers_amount"],
-                          location = user_data["location"]
+    db_user = models.User(email=email,
+                          name=name,
+                          photo_url=photo_url,
+                          linkedin_url=user_data["linkedin_url"],
+                          followers_amount=user_data["followers_amount"],
+                          location=user_data["location"]
                           )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-
-
