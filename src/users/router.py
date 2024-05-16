@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 
 from src.database import get_db
 
-from src.users.schemas import ValidUserReq, NewUserReq
+from src.users.schemas import NewUserReq
 from src.users.crud import *
 
 from src.utils.validations import check_email
@@ -11,14 +11,16 @@ from src.utils.validations import check_email
 user = APIRouter()
 
 
-@user.post("/user/validate", tags=["users"])
-def user_validate(valid_user_req: ValidUserReq, db: Session = Depends(get_db)) -> JSONResponse:
-    response: bool = False
+@user.get("/user/{email}", tags=["users"])
+def user_validate(email: str, db: Session = Depends(get_db)) -> JSONResponse:
+    if not check_email(email):
+        raise HTTPException(status_code=400, detail="Invalid Email")
 
-    if get_email(db, email=valid_user_req.email):
-        response = True
+    user_record = get_email(db, email=email)
+    if not user_record:
+        raise HTTPException(status_code=404, detail="Not Found")
 
-    return JSONResponse(content={"response": response}, status_code=status.HTTP_200_OK)
+    return user_record
 
 
 @user.post("/user/new", tags=["users"])

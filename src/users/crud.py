@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from src.users.linkedin_data import linkedin_data
+from src.users.linkedin_scraper import linkedin_data
 
 import src.models as models
 

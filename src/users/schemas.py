@@ -2,10 +2,6 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class ValidUserReq(BaseModel):
-    email: str
-
-
 class NewUserReq(BaseModel):
     name: str
     email: str
