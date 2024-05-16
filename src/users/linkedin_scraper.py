@@ -6,9 +6,6 @@ from src.utils.scraper import internet_search
 from src.models import User
 
 
-linkedin_connect = Linkedin(os.getenv("LINKEDIN_USER"), os.getenv("LINKEDIN_PASSWORD"))
-
-
 def search_linkedin_url(name: str) -> str | None:
     """
     Searches for a LinkedIn profile URL based on the provided name.
@@ -53,6 +50,7 @@ def linkedin_public_identifier(url) -> str | None:
 
 
 def get_linkedin_profile(public_identifier: str) -> User:
+    linkedin_connect = Linkedin(os.getenv("LINKEDIN_USER"), os.getenv("LINKEDIN_PASSWORD"))
 
     profile_data = linkedin_connect.get_profile(public_identifier)
 
