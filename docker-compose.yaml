@@ -21,6 +21,8 @@ services:
     environment:
       - DB_SOURCE=postgresql://root:secret@db:5432/fundraising_school_db?sslmode=disable
       - PORT=8080
+      - LINKEDIN_USER=pirajulian568@gmail.com
+      - LINKEDIN_PASSWORD=Josepira1*
     depends_on:
       db:
         condition: service_healthy

@@ -1,3 +1,5 @@
+import datetime
+
 from src.utils.constants import SEARCH_URL
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
@@ -37,3 +39,23 @@ def get_html(url: str) -> BeautifulSoup:
     html = urlopen(url).read().decode("utf-8")
 
     return BeautifulSoup(html, "html.parser")
+
+
+def get_time_period(values: dict) -> tuple[None | datetime.datetime, None | datetime.datetime]:
+    start_date: None | datetime.datetime = None
+    end_date: None | datetime.datetime = None
+
+    if values.get("timePeriod"):
+        if values["timePeriod"].get("startDate"):
+            start_year = values["timePeriod"]["startDate"].get("year", 0)
+            start_month = values["timePeriod"]["startDate"].get("month", 0)
+
+            start_date = datetime.datetime(start_year, start_month, 1)
+
+        if values["timePeriod"].get("endDate"):
+            end_year = values["timePeriod"]["endDate"].get("year", 0)
+            end_month = values["timePeriod"]["endDate"].get("month", 0)
+
+            end_date = datetime.datetime(end_year, end_month, 1)
+
+    return start_date, end_date

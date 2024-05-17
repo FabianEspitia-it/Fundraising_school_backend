@@ -24,6 +24,9 @@ class User(Base):
     location = Column(String(255), nullable=True)
     seeking_capital = Column(Boolean, nullable=True)
     photo_url = Column(String(255), nullable=False, unique=True)
+    industry = Column(String(255), nullable=True, unique=False)
+    summary = Column(Text, nullable=True, unique=False)
+    headline = Column(Text, nullable=True, unique=False)
     created_at = Column(DateTime, nullable=False, default=func.now())
     updated_at = Column(DateTime, nullable=False, default=func.now(), onupdate=func.now())
     deleted_at = Column(DateTime, nullable=True)
@@ -32,40 +35,37 @@ class User(Base):
     stage_round = relationship("Round", back_populates="user")
 
     education = relationship("Education", back_populates="user")
-    job = relationship("Job", back_populates="user")
+    experience = relationship("Experience", back_populates="user")
 
 
 class Education(Base):
     __tablename__ = "education"
     id = Column(Integer, primary_key=True)
-    degree_name = Column(String(200), nullable=False)
+    degree_name = Column(String(200), nullable=True)
+    grade = Column(String(200), nullable=True)
     school_name = Column(String(200), nullable=False)
-    url_school_logo = Column(String(255), nullable=False)
-    linkedin_url = Column(String(255), nullable=False)
-    start_year = Column(DateTime, nullable=False)
-    end_year = Column(DateTime, nullable=False)
+    linkedin_url = Column(String(255), nullable=True)
+    description = Column(Text, nullable=True)
+    start_date = Column(DateTime, nullable=True)
+    end_date = Column(DateTime, nullable=True)
 
     user_id = Column(Integer, ForeignKey("user.id"))
     user = relationship("User", back_populates="education")
 
 
-class Job(Base):
-    __tablename__ = "job"
+class Experience(Base):
+    __tablename__ = "experience"
     id = Column(Integer, primary_key=True)
-    name = Column(String(200), nullable=False)
-    website_url = Column(String(200), nullable=False)
-    url_logo = Column(String(255), nullable=False)
-    amount_employees = Column(String(255), nullable=False)
-    country = Column(String(255), nullable=False)
-    industry = Column(String(255), nullable=False)
+    company = Column(String(200), nullable=False)
+    location = Column(String(255), nullable=True)
     linkedin_url = Column(String(255), nullable=False)
-    current = Column(Boolean, nullable=False)
-    role = Column(String(200), nullable=False)
-    start_year = Column(DateTime, nullable=False)
-    end_year = Column(DateTime, nullable=False)
+    role = Column(String(200), nullable=True)
+    start_date = Column(DateTime, nullable=True)
+    end_date = Column(DateTime, nullable=True)
+    description = Column(Text, nullable=True)
 
     user_id = Column(Integer, ForeignKey("user.id"))
-    user = relationship("User", back_populates="job")
+    user = relationship("User", back_populates="experience")
 
 
 # VC MODELS

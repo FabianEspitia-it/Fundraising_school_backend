@@ -11,11 +11,11 @@ vc_sheet_router = APIRouter()
 def new_reporter(db: Session = Depends(get_db)):
     reporters = vc_scraper_reporters()
 
-    add_reporters(db=db, reporters=reporters)
+    create_list_reporters(db=db, reporters=reporters)
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
 
 @vc_sheet_router.get("/vc_sheet/reporters", tags=["vc_sheet"])
 def get_reporters(db: Session = Depends(get_db), page: int = 0, limit: int = 10):
-    return all_reporters(db=db, page=page, limit=limit)
+    return pagination_reporters(db=db, page=page, limit=limit)
