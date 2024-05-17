@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 
 from src.database import get_db
 from src.vc_sheet.crud import *
+from src.vc_sheet.vc_scraper import vc_scraper_reporters
 
 vc_sheet_router = APIRouter()
 

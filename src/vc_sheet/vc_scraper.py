@@ -1,10 +1,12 @@
 from src.models import Reporter
-from src.vc_sheet.constants import REPORTERS_URL, URL, FUNDS_URL, INVESTORS_URL
+from src.vc_sheet.constants import *
 from src.utils.scraper import get_html
 
+from src.utils.scraper import move_down
 
-def vc_scraper_sheets() -> None:
-    soup = get_html(URL)
+
+def vc_scraper_sheets():
+    soup = get_html()
 
     vc_images = soup.find_all("div", class_="content-thumb")
     titles = soup.find_all("div", class_="content-label bold")
@@ -14,27 +16,53 @@ def vc_scraper_sheets() -> None:
     twitter_url = soup.find_all("a", class_="contact-icon w-inline-block")
     website_url = soup.find_all("a", class_="contact-icon site-link w-inline-block")
 
-    return vc_images, titles, descriptions, crunch_base_url, linkedin_url, twitter_url, website_url
+    return ""
+
+
+def vc_scraper_all_sheets():
+    soup = get_html(ALL_SHEETS_URL)
+
+    funds_name = soup.find_all("div", class_="card-row-name")
+    funds_description = soup.find_all("div", class_="small-description max-height")
+    funds_image = soup.find_all("div", class_="card-row-thumb taller")
+    funds_amount = soup.find_all("div", class_="pill-total")
+
+
+
 
 
 def vc_scraper_investors() -> None:
-    soup = get_html(INVESTORS_URL)
+    
+    soup = move_down(INVESTORS_URL, 35)
 
-    investor_name = soup.find_all("h3", class_="list-heading list-pages")
+
+    investor_name = soup.find_all("h3", class_="list-heading list-pages") 
     investor_photo = soup.find_all("div", class_="list-photo investor-cards _55")
     investor_role = soup.find_all("div", class_="html-embed w-embed")
     investor_description = soup.find_all("div", class_="shortdesccard more-top w-richtext")
-    investor_email = soup.find_all("a", class_="contact-icon email w-inline-block")
+    investor_email = soup.find_all("a", class_="contact-icon email w-inline-block") 
     investor_twitter = soup.find_all("a", class_="contact-icon x w-inline-block")
     investor_linkedin = soup.find_all("a", class_="contact-icon linkedin w-inline-block")
     investor_crunch_base = soup.find_all("a", class_="contact-icon crunchbase w-inline-block")
     investor_youtube = soup.find_all("a", class_="contact-icon video w-inline-block")
+    investor_invest = soup.find_all("div", class_="align-row center-mobile")
 
-    return investor_name, investor_photo, investor_role, investor_description, investor_email, investor_twitter, investor_linkedin, investor_crunch_base, investor_youtube
+    final_investor_vc = []
+
+    
+    for parent_div in investor_invest:
+       
+        filtered_pill_items = [div for div in parent_div.find_all('div', class_='pill-item') if div.get('class') == ['pill-item']]
+        
+        final_investor_vc.append([item.get_text() for item in filtered_pill_items])
+    
+
+    return ""
+
 
 
 def vc_scraper_funds() -> None:
-    soup = get_html(FUNDS_URL)
+    soup = move_down(FUNDS_URL, 10)
 
     fund_name = soup.find_all("h3", class_="list-heading list-pages")
     fund_description = soup.find_all("div", class_="shortdesccard w-richtext")
@@ -45,7 +73,18 @@ def vc_scraper_funds() -> None:
     fund_crunch_base = soup.find_all("a", class_="contact-icon crunchbase w-inline-block")
     fund_invest = soup.find_all("div", class_="align-row no-sho-mo")
 
-    return fund_name, fund_description, fund_photo, fund_website, fund_twitter, fund_linkedin, fund_crunch_base, fund_invest
+    final_fund_invest = []
+
+    
+    for parent_div in fund_invest:
+       
+        filtered_pill_items = [div for div in parent_div.find_all('div', class_='pill-item') if div.get('class') == ['pill-item']]
+        
+        final_fund_invest.append([item.get_text() for item in filtered_pill_items])
+
+
+    return ""
+
 
 
 def vc_scraper_reporters() -> list[Reporter]:
