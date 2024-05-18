@@ -28,19 +28,14 @@ def vc_scraper_all_sheets():
     funds_amount = soup.find_all("div", class_="pill-total")
 
 
-
-
-
 def vc_scraper_investors() -> None:
-    
     soup = move_down(INVESTORS_URL, 35)
 
-
-    investor_name = soup.find_all("h3", class_="list-heading list-pages") 
+    investor_name = soup.find_all("h3", class_="list-heading list-pages")
     investor_photo = soup.find_all("div", class_="list-photo investor-cards _55")
     investor_role = soup.find_all("div", class_="html-embed w-embed")
     investor_description = soup.find_all("div", class_="shortdesccard more-top w-richtext")
-    investor_email = soup.find_all("a", class_="contact-icon email w-inline-block") 
+    investor_email = soup.find_all("a", class_="contact-icon email w-inline-block")
     investor_twitter = soup.find_all("a", class_="contact-icon x w-inline-block")
     investor_linkedin = soup.find_all("a", class_="contact-icon linkedin w-inline-block")
     investor_crunch_base = soup.find_all("a", class_="contact-icon crunchbase w-inline-block")
@@ -49,16 +44,13 @@ def vc_scraper_investors() -> None:
 
     final_investor_vc = []
 
-    
     for parent_div in investor_invest:
-       
-        filtered_pill_items = [div for div in parent_div.find_all('div', class_='pill-item') if div.get('class') == ['pill-item']]
-        
+        filtered_pill_items = [div for div in parent_div.find_all('div', class_='pill-item') if
+                               div.get('class') == ['pill-item']]
+
         final_investor_vc.append([item.get_text() for item in filtered_pill_items])
-    
 
     return ""
-
 
 
 def vc_scraper_funds() -> None:
@@ -75,16 +67,13 @@ def vc_scraper_funds() -> None:
 
     final_fund_invest = []
 
-    
     for parent_div in fund_invest:
-       
-        filtered_pill_items = [div for div in parent_div.find_all('div', class_='pill-item') if div.get('class') == ['pill-item']]
-        
+        filtered_pill_items = [div for div in parent_div.find_all('div', class_='pill-item') if
+                               div.get('class') == ['pill-item']]
+
         final_fund_invest.append([item.get_text() for item in filtered_pill_items])
 
-
     return ""
-
 
 
 def vc_scraper_reporters() -> list[Reporter]:

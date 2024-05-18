@@ -1,11 +1,7 @@
-import os
-import time
-
 from bs4 import BeautifulSoup
-from linkedin_api import Linkedin
 from sqlalchemy.orm import Session
 
-from src.utils.scraper import internet_search, get_time_period
+from src.utils.scraper import internet_search, get_time_period, authenticate_linkedin
 from src.models import User, Education, Experience
 from src.users.schemas import NewUserReq
 
@@ -55,21 +51,15 @@ def linkedin_public_identifier(url) -> str | None:
     return None
 
 
-def authenticate_linkedin() -> Linkedin:
-    linkedin_connect = None
-
-    while not linkedin_connect:
-        try:
-            linkedin_connect = Linkedin(os.getenv("LINKEDIN_USER"), os.getenv("LINKEDIN_PASSWORD"))
-        except Exception as e:
-            print(f"[WARNING] Error while authenticating LinkedIn: {e}")
-
-            time.sleep(2.0)
-
-    return linkedin_connect
-
-
 def scraper_linkedin_profile(db: Session, public_identifier: str, user: User) -> None:
+    """
+    Scrapes LinkedIn profile data and saves it to the database for the given user.
+
+    Args:
+        db (Session): The database session to use for interacting with the database.
+        public_identifier (str): The public identifier of the LinkedIn profile to scrape.
+        user (User): The user object to which the scraped LinkedIn profile data will be associated.
+    """
     linkedin_connect = authenticate_linkedin()
 
     profile_data: dict = linkedin_connect.get_profile(public_identifier)
@@ -132,6 +122,13 @@ def scraper_linkedin_profile(db: Session, public_identifier: str, user: User) ->
 
 
 def user_scraper(db: Session, req: NewUserReq) -> None:
+    """
+    Scrapes LinkedIn profile data for a new user and saves it to the database.
+
+    Args:
+        db (Session): The database session to use for interacting with the database.
+        req (NewUserReq): The request object containing information about the new user.
+    """
     user: User = User(
         email=req.email,
         photo_url=req.linkedin_picture,

@@ -12,6 +12,15 @@ services:
       timeout: 5s
       retries: 5
 
+  webdriver:
+    image: selenium/standalone-chrome:latest
+    restart: always
+    privileged: true
+    shm_size: 2g
+    hostname: chrome
+    ports:
+      - "7900:7900"
+
   api:
     build:
       context: .
@@ -23,6 +32,9 @@ services:
       - PORT=8080
       - LINKEDIN_USER=pirajulian568@gmail.com
       - LINKEDIN_PASSWORD=Josepira1*
+      - WEBDRIVER_URL=http://chrome:4444/wd/hub
     depends_on:
       db:
+        condition: service_healthy
+      webdriver:
         condition: service_healthy

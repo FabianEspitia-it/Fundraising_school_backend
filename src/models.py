@@ -86,8 +86,4 @@ class Reporter(Base):
     company = Column(String(50), nullable=True)
 
 
-
-
 Base.metadata.create_all(bind=engine)
-
-

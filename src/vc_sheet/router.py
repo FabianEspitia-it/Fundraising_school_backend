@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 
 from src.database import get_db
 from src.vc_sheet.crud import *
-from src.vc_sheet.vc_scraper import vc_scraper_reporters
+from src.vc_sheet.vc_scraper import vc_scraper_reporters, vc_scraper_investors
 
 vc_sheet_router = APIRouter()
 
@@ -20,3 +20,7 @@ def new_reporter(db: Session = Depends(get_db)):
 @vc_sheet_router.get("/vc_sheet/reporters", tags=["vc_sheet"])
 def get_reporters(db: Session = Depends(get_db), page: int = 0, limit: int = 10):
     return pagination_reporters(db=db, page=page, limit=limit)
+
+@vc_sheet_router.get("/vc_sheet/", tags=["vc_sheet"])
+def get_reporters():
+    vc_scraper_investors()
