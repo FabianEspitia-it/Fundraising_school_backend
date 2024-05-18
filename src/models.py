@@ -1,8 +1,19 @@
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Table, Column, ForeignKey
 from sqlalchemy.sql.sqltypes import Integer, String, Boolean, DateTime, Text
 from src.database import engine, Base
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
+
+
+
+class InvestorRound(Base):
+    __tablename__ = 'investor_rounds'
+
+    investor_id = Column(Integer, ForeignKey('vc_investor.id'), primary_key=True)
+    round_id = Column(Integer, ForeignKey('round.id'), primary_key=True)
+
+    investor = relationship("Investor", foreign_keys=[investor_id])
+    round = relationship("Round", foreign_keys=[round_id])
 
 
 class Round(Base):
@@ -11,6 +22,7 @@ class Round(Base):
     stage = Column(String(200), nullable=False)
 
     user = relationship("User", back_populates="stage_round")
+    investor = relationship("Investor", secondary="investor_rounds", back_populates='rounds')
 
 
 class User(Base):
@@ -85,5 +97,20 @@ class Reporter(Base):
     location = Column(String(50), nullable=True)
     company = Column(String(50), nullable=True)
 
+
+class Investor(Base):
+    __tablename__ = "vc_investor"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    photo = Column(String(255), nullable=True)
+    role = Column(String(255), nullable=True)
+    description = Column(Text, nullable=True)
+    email = Column(String(255), nullable=True)
+    twitter = Column(Text, nullable=True)
+    linkedin = Column(Text, nullable=True)
+    crunch_base = Column(Text, nullable=True)
+    youtube = Column(Text, nullable=True)
+
+    rounds = relationship("Round", secondary="investor_rounds", back_populates='investor')
 
 Base.metadata.create_all(bind=engine)
