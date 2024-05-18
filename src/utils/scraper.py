@@ -31,9 +31,6 @@ def move_down(url:str, scroll_count: int) -> BeautifulSoup:
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(2)  
 
-   
-    page_source = driver.page_source
-
     
     html = driver.page_source
 
