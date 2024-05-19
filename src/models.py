@@ -5,6 +5,15 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
 
+class FundRound(Base):
+    __tablename__ = 'fund_rounds'
+
+    fund_id = Column(Integer, ForeignKey('vc_fund.id'), primary_key=True)
+    round_id = Column(Integer, ForeignKey('round.id'), primary_key=True)
+
+    fund = relationship("Fund", foreign_keys=[fund_id])
+    round = relationship("Round", foreign_keys=[round_id])
+
 
 class InvestorRound(Base):
     __tablename__ = 'investor_rounds'
@@ -23,6 +32,7 @@ class Round(Base):
 
     user = relationship("User", back_populates="stage_round")
     investor = relationship("Investor", secondary="investor_rounds", back_populates='rounds')
+    fund = relationship("Fund", secondary="fund_rounds", back_populates='rounds')
 
 
 class User(Base):
@@ -112,6 +122,22 @@ class Investor(Base):
     youtube = Column(Text, nullable=True)
 
     rounds = relationship("Round", secondary="investor_rounds", back_populates='investor')
+
+
+class Fund(Base):
+    __tablename__ = "vc_fund"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    photo = Column(String(255), nullable=True)
+    website = Column(String(255), nullable=True)
+    twitter = Column(String(255), nullable=True)
+    linkedin = Column(String(255), nullable=True)
+    crunch_base = Column(String(255), nullable=True)
+
+    rounds = relationship("Round", secondary="fund_rounds", back_populates='fund')
+
+
 
 Base.metadata.create_all(bind=engine)
 

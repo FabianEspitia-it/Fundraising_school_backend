@@ -1,4 +1,4 @@
-from src.models import Reporter, Investor
+from src.models import Reporter, Investor, Fund
 from src.vc_sheet.constants import *
 from src.utils.scraper import get_html
 
@@ -29,6 +29,7 @@ def vc_scraper_all_sheets():
 
 
 def vc_scraper_funds() -> None:
+
     soup = move_down(FUNDS_URL, 10)
 
     fund_name = soup.find_all("h3", class_="list-heading list-pages")
@@ -49,8 +50,24 @@ def vc_scraper_funds() -> None:
         
         final_fund_invest.append([item.get_text() for item in filtered_pill_items])
 
-    
-    return ""
+    funds : list[Fund] = []
+
+    for n in range(0, len(fund_name)):
+        fund = Fund(
+            name = fund_name[n].text.strip() if n < len(fund_name) else None,
+            description = fund_description[n].text.strip() if n < len(fund_description) else None,
+            photo = str(fund_photo[n].get("style")).replace("background-image:url(", "")
+            .replace(")", "")
+            .replace('"', '') if n < len(fund_photo) else None,
+            website = fund_website[n].get("href") if n < len(fund_website) else None,
+            twitter = fund_twitter[n].get("href") if n < len(fund_twitter) else None,
+            linkedin = fund_linkedin[n].get("href") if n < len(fund_linkedin) else None,
+            crunch_base = fund_crunch_base[n].get("href") if n < len(fund_crunch_base) else None
+        )
+
+        funds.append(fund)
+
+    return funds, final_fund_invest
 
 
 def vc_scraper_investors() -> None:
@@ -98,7 +115,7 @@ def vc_scraper_investors() -> None:
 
         investors.append(investor)
 
-    return investors
+    return investors, final_investor_vc
 
 
 
@@ -148,3 +165,6 @@ def vc_scraper_reporters() -> list[Reporter]:
         reporters.append(reporter)
 
     return reporters
+
+
+    
