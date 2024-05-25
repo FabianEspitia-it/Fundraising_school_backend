@@ -7,7 +7,7 @@ def create_bulk_reporters(db: Session, reporters: list[Reporter]) -> None:
     db.commit()
 
 
-def pagination_reporter(db: Session, page: int, limit: int):
+def pagination_reporters(db: Session, page: int, limit: int):
     return db.query(Reporter).offset(page * 10).limit(limit).all()
 
 

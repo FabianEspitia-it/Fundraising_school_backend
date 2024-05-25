@@ -1,3 +1,5 @@
+from typing import Tuple, List, Any
+
 from src.models import Reporter, Investor, Fund
 from src.vc_sheet.constants import *
 from src.utils.scraper import get_html
@@ -28,94 +30,7 @@ def vc_scraper_all_sheets():
     funds_amount = soup.find_all("div", class_="pill-total")
 
 
-def vc_scraper_funds() -> None:
-    soup = move_down(FUNDS_URL, 10)
-
-    fund_name = soup.find_all("h3", class_="list-heading list-pages")
-    fund_description = soup.find_all("div", class_="shortdesccard w-richtext")
-    fund_photo = soup.find_all("div", class_="list-photo investor-cards _55")
-    fund_website = soup.find_all("a", class_="contact-icon site-link w-inline-block")
-    fund_twitter = soup.find_all("a", class_="contact-icon x w-inline-block")
-    fund_linkedin = soup.find_all("a", class_="contact-icon linkedin w-inline-block")
-    fund_crunch_base = soup.find_all("a", class_="contact-icon crunchbase w-inline-block")
-    fund_invest = soup.find_all("div", class_="align-row no-sho-mo")
-
-    final_fund_invest = []
-
-    
-    for parent_div in fund_invest:
-        filtered_pill_items = [div for div in parent_div.find_all('div', class_='pill-item') if div.get('class') == ['pill-item']]
-        final_fund_invest.append([item.get_text() for item in filtered_pill_items])
-
-    funds : list[Fund] = []
-
-    for n in range(0, len(fund_name)):
-        fund = Fund(
-            name = fund_name[n].text.strip() if n < len(fund_name) else None,
-            description = fund_description[n].text.strip() if n < len(fund_description) else None,
-            photo = str(fund_photo[n].get("style")).replace("background-image:url(", "")
-            .replace(")", "")
-            .replace('"', '') if n < len(fund_photo) else None,
-            website = fund_website[n].get("href") if n < len(fund_website) else None,
-            twitter = fund_twitter[n].get("href") if n < len(fund_twitter) else None,
-            linkedin = fund_linkedin[n].get("href") if n < len(fund_linkedin) else None,
-            crunch_base = fund_crunch_base[n].get("href") if n < len(fund_crunch_base) else None
-        )
-
-        funds.append(fund)
-
-    return funds, final_fund_invest
-
-
-def vc_scraper_investors() -> None:
-    
-    soup = move_down(INVESTORS_URL, 35)
-
-
-    investor_name = soup.find_all("h3", class_="list-heading list-pages") 
-    investor_photo = soup.find_all("div", class_="list-photo investor-cards _55")
-    investor_role = soup.find_all("div", class_="html-embed w-embed")
-    investor_description = soup.find_all("div", class_="shortdesccard more-top w-richtext")
-    investor_email = soup.find_all("a", class_="contact-icon email w-inline-block") 
-    investor_twitter = soup.find_all("a", class_="contact-icon x w-inline-block")
-    investor_linkedin = soup.find_all("a", class_="contact-icon linkedin w-inline-block")
-    investor_crunch_base = soup.find_all("a", class_="contact-icon crunchbase w-inline-block")
-    investor_youtube = soup.find_all("a", class_="contact-icon video w-inline-block")
-    investor_invest = soup.find_all("div", class_="align-row center-mobile")
-
-    final_investor_vc = []
-
-    
-    for parent_div in investor_invest:
-       
-        filtered_pill_items = [div for div in parent_div.find_all('div', class_='pill-item') if div.get('class') == ['pill-item']]
-        
-        final_investor_vc.append([item.get_text() for item in filtered_pill_items])
-    
-    investors : list[Investor] = []
-
-    for n in range(0, len(investor_name)):
-        investor =Investor(
-            name = investor_name[n].text.strip() if n < len(investor_name) else None,
-            photo = str(investor_photo[n].get("style")).replace("background-image:url(", "")
-            .replace(")", "")
-            .replace('"', '') if n < len(investor_photo) else None,
-            role = investor_role[n].text.strip(),
-            description = investor_description[n].text.strip() if n < len(investor_description) else None,
-            email = investor_email[n].get("href").replace("mailto:", "").replace("?subject=Pitch", "")
-            if n < len(investor_email) else None,
-            twitter = investor_twitter[n].get("href") if n < len(investor_twitter) else None,
-            linkedin = investor_linkedin[n].get("href") if n < len(investor_linkedin) else None,
-            crunch_base = investor_crunch_base[n].get("href") if n< len(investor_crunch_base) else None,
-            youtube = investor_youtube[n].get("href") if n < len(investor_youtube) else None
-        )
-
-        investors.append(investor)
-
-    return investors, final_investor_vc
-
-
-def vc_scraper_funds() -> None:
+def vc_scraper_funds() -> tuple[list[Fund], list[list[Any]]]:
     soup = move_down(FUNDS_URL, 10)
 
     fund_name = soup.find_all("h3", class_="list-heading list-pages")
@@ -132,10 +47,71 @@ def vc_scraper_funds() -> None:
     for parent_div in fund_invest:
         filtered_pill_items = [div for div in parent_div.find_all('div', class_='pill-item') if
                                div.get('class') == ['pill-item']]
-
         final_fund_invest.append([item.get_text() for item in filtered_pill_items])
 
-    return ""
+    funds: list[Fund] = []
+
+    for n in range(0, len(fund_name)):
+        fund = Fund(
+            name=fund_name[n].text.strip() if n < len(fund_name) else None,
+            description=fund_description[n].text.strip() if n < len(fund_description) else None,
+            photo=str(fund_photo[n].get("style")).replace("background-image:url(", "")
+            .replace(")", "")
+            .replace('"', '') if n < len(fund_photo) else None,
+            website=fund_website[n].get("href") if n < len(fund_website) else None,
+            twitter=fund_twitter[n].get("href") if n < len(fund_twitter) else None,
+            linkedin=fund_linkedin[n].get("href") if n < len(fund_linkedin) else None,
+            crunch_base=fund_crunch_base[n].get("href") if n < len(fund_crunch_base) else None
+        )
+
+        funds.append(fund)
+
+    return funds, final_fund_invest
+
+
+def vc_scraper_investors() -> tuple[list[Investor], list[list[Any]]]:
+    soup = move_down(INVESTORS_URL, 35)
+
+    investor_name = soup.find_all("h3", class_="list-heading list-pages")
+    investor_photo = soup.find_all("div", class_="list-photo investor-cards _55")
+    investor_role = soup.find_all("div", class_="html-embed w-embed")
+    investor_description = soup.find_all("div", class_="shortdesccard more-top w-richtext")
+    investor_email = soup.find_all("a", class_="contact-icon email w-inline-block")
+    investor_twitter = soup.find_all("a", class_="contact-icon x w-inline-block")
+    investor_linkedin = soup.find_all("a", class_="contact-icon linkedin w-inline-block")
+    investor_crunch_base = soup.find_all("a", class_="contact-icon crunchbase w-inline-block")
+    investor_youtube = soup.find_all("a", class_="contact-icon video w-inline-block")
+    investor_invest = soup.find_all("div", class_="align-row center-mobile")
+
+    final_investor_vc = []
+
+    for parent_div in investor_invest:
+        filtered_pill_items = [div for div in parent_div.find_all('div', class_='pill-item') if
+                               div.get('class') == ['pill-item']]
+
+        final_investor_vc.append([item.get_text() for item in filtered_pill_items])
+
+    investors: list[Investor] = []
+
+    for n in range(0, len(investor_name)):
+        investor = Investor(
+            name=investor_name[n].text.strip() if n < len(investor_name) else None,
+            photo=str(investor_photo[n].get("style")).replace("background-image:url(", "")
+            .replace(")", "")
+            .replace('"', '') if n < len(investor_photo) else None,
+            role=investor_role[n].text.strip(),
+            description=investor_description[n].text.strip() if n < len(investor_description) else None,
+            email=investor_email[n].get("href").replace("mailto:", "").replace("?subject=Pitch", "")
+            if n < len(investor_email) else None,
+            twitter=investor_twitter[n].get("href") if n < len(investor_twitter) else None,
+            linkedin=investor_linkedin[n].get("href") if n < len(investor_linkedin) else None,
+            crunch_base=investor_crunch_base[n].get("href") if n < len(investor_crunch_base) else None,
+            youtube=investor_youtube[n].get("href") if n < len(investor_youtube) else None
+        )
+
+        investors.append(investor)
+
+    return investors, final_investor_vc
 
 
 def vc_scraper_reporters() -> list[Reporter]:

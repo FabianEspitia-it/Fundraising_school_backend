@@ -21,13 +21,14 @@ def new_reporter(db: Session = Depends(get_db)) -> JSONResponse:
 def get_reporters(db: Session = Depends(get_db), page: int = 0, limit: int = 10):
     return pagination_reporters(db=db, page=page, limit=limit)
 
+
 # Investor Routes
 
 @vc_sheet_router.post("/investors/", tags=["vc_sheet"])
 def new_investor(db: Session = Depends(get_db)) -> JSONResponse:
     investors, invest = vc_scraper_investors()
 
-    create_bulk_investors(db=db, investors= investors, investor_rounds=invest)
+    create_bulk_investors(db=db, investors=investors, investor_rounds=invest)
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
@@ -49,6 +50,3 @@ def new_fund(db: Session = Depends(get_db)) -> JSONResponse:
 @vc_sheet_router.get("/vc_sheet/funds", tags=["vc_sheet"])
 def get_funds(db: Session = Depends(get_db), page: int = 0, limit: int = 10):
     return get_all_funds(db=db, page=page, limit=limit)
-
-
-
