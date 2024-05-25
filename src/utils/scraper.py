@@ -1,3 +1,4 @@
+import os
 import requests
 import time
 import datetime
@@ -23,6 +24,7 @@ def move_down(url: str, scroll_count: int) -> BeautifulSoup:
     """
 
     driver = webdriver.Remote(
+        options=webdriver.ChromeOptions(),
         command_executor=os.getenv("WEBDRIVER_URL")
     )
 
@@ -82,9 +84,9 @@ def get_time_period(values: dict) -> tuple[None | datetime.datetime, None | date
     Args:
         values (dict): A dictionary containing information about the time period, including start date and end date.
 
-    Returns:
-        tuple[None | datetime.datetime, None | datetime.datetime]: A tuple containing the start date and end date of the time period.
-            If the start date or end date is not provided in the input dictionary, it will be returned as None.
+    Returns: tuple[None | datetime.datetime, None | datetime.datetime]: A tuple containing the start date and end
+    date of the time period. If the start date or end date is not provided in the input dictionary, it will be
+    returned as None.
     """
     start_date: None | datetime.datetime = None
     end_date: None | datetime.datetime = None

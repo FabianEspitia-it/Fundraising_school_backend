@@ -1,3 +1,5 @@
+from typing import Union
+
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -5,7 +7,7 @@ from datetime import datetime
 class NewUserReq(BaseModel):
     name: str
     email: str
-    linkedin_picture: str
+    linkedin_picture: Union[str, None] = None
 
 
 class ValidUserRes(BaseModel):

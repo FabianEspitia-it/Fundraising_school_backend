@@ -5,7 +5,6 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
 
-
 class InvestorRound(Base):
     __tablename__ = 'investor_rounds'
 
@@ -35,7 +34,7 @@ class User(Base):
     linkedin_url = Column(String(255), nullable=False, unique=True)
     location = Column(String(255), nullable=True)
     seeking_capital = Column(Boolean, nullable=True)
-    photo_url = Column(String(255), nullable=False, unique=True)
+    photo_url = Column(String(255), nullable=True)
     industry = Column(String(255), nullable=True, unique=False)
     summary = Column(Text, nullable=True, unique=False)
     headline = Column(Text, nullable=True, unique=False)
@@ -112,5 +111,6 @@ class Investor(Base):
     youtube = Column(Text, nullable=True)
 
     rounds = relationship("Round", secondary="investor_rounds", back_populates='investor')
+
 
 Base.metadata.create_all(bind=engine)

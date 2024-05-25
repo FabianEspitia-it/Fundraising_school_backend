@@ -131,9 +131,11 @@ def user_scraper(db: Session, req: NewUserReq) -> None:
     """
     user: User = User(
         email=req.email,
-        photo_url=req.linkedin_picture,
         first_name=req.name
     )
+
+    if req.linkedin_picture is None:
+        user.photo_url = req.linkedin_picture
 
     linkedin_url = search_linkedin_url(req.name)
     if not linkedin_url:

@@ -16,11 +16,5 @@ def add_investors(db: Session, investors: list[Investor]):
     db.commit()
 
 
-
-
-
-def all_investors(db: Session, page:int, limit: int):
+def all_investors(db: Session, page: int, limit: int):
     return db.query(Investor).offset(page * 10).limit(limit).all()
-
-
-
