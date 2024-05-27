@@ -8,6 +8,12 @@ class NewUserReq(BaseModel):
     linkedin_picture: str
 
 
+class AdditionalDataReq(BaseModel):
+    email: str
+    nickname: str
+    contact_email: str
+
+
 class ValidUserRes(BaseModel):
     is_user_saved: bool
     error: str | None = None

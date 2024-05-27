@@ -7,6 +7,70 @@ from src.vc_sheet.vc_scraper import *
 
 vc_sheet_router = APIRouter()
 
+# FUND ROUTES
+
+@vc_sheet_router.get("/vc_sheet/funds", tags=["vc_sheet"])
+def get_funds(db: Session = Depends(get_db), page: int = 0, limit: int = 10):
+    """
+    Retrieve a list of venture capital funds.
+
+    Args:
+        db (Session, optional): Database session dependency.
+        page (int, optional): The page number for pagination. Defaults to 0.
+        limit (int, optional): The number of records to return per page. Defaults to 10.
+
+    Returns:
+        JSONResponse: A JSON response containing the list of funds.
+    """
+    return get_all_funds(db=db, page=page, limit=limit)
+
+
+@vc_sheet_router.post("/vc_sheet/funds/add", tags=["vc_sheet"])
+def new_fund(db: Session = Depends(get_db)) -> JSONResponse:
+    """
+    Scrape and add new venture capital funds to the database.
+
+    Args:
+        db (Session, optional): Database session dependency.
+
+    Returns:
+        JSONResponse: A JSON response indicating the creation status.
+    """
+    funds, final_fund_invest, fund_sectors, fund_countries_invest, check_size_range, partner_names, partner_links = vc_scraper_funds()
+
+    create_bulk_fund(
+        db=db, 
+        funds=funds,
+        fund_rounds=final_fund_invest,
+        fund_countries=fund_countries_invest,
+        fund_partners=partner_names,
+        fund_check_size=check_size_range,
+        fund_sectors=fund_sectors,
+        partner_links=partner_links
+
+    ) 
+
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+#PARTNER ROUTES
+
+@vc_sheet_router.post("/vc_sheet/partners/add", tags=["vc_sheet"])
+def new_partner(db: Session = Depends(get_db)) -> JSONResponse:
+    """
+    Add new partner information to the database.
+
+    Args:
+        db (Session, optional): Database session dependency.
+
+    Returns:
+        JSONResponse: A JSON response indicating the creation status.
+    """
+    add_partners_information(db=db)
+
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+"""
+ROUTES THAT WE DONT NEED AT THE MOMENT
 
 @vc_sheet_router.post("/reporters/", tags=["vc_sheet"])
 def new_reporter(db: Session = Depends(get_db)) -> JSONResponse:
@@ -36,19 +100,11 @@ def new_investor(db: Session = Depends(get_db)) -> JSONResponse:
 def get_investors(db: Session = Depends(get_db), page: int = 0, limit: int = 10):
     return get_all_investors(db=db, page=page, limit=limit)
 
-
-@vc_sheet_router.post("/funds/", tags=["vc_sheet"])
-def new_fund(db: Session = Depends(get_db)) -> JSONResponse:
-    funds, fund_rounds = vc_scraper_funds()
-
-    create_bulk_fund(db=db, funds=funds, fund_rounds=fund_rounds)
-
-    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+"""
 
 
-@vc_sheet_router.get("/vc_sheet/funds", tags=["vc_sheet"])
-def get_funds(db: Session = Depends(get_db), page: int = 0, limit: int = 10):
-    return get_all_funds(db=db, page=page, limit=limit)
+
+
 
 
 
