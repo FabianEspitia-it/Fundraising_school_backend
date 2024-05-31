@@ -101,27 +101,8 @@ def new_investor(db: Session = Depends(get_db)) -> JSONResponse:
 def get_investors(db: Session = Depends(get_db), page: int = 0, limit: int = 10):
     return get_all_investors(db=db, page=page, limit=limit)
 
-<<<<<<< HEAD
 """
 
 
 
 
-
-
-
-=======
-
-@vc_sheet_router.post("/funds/", tags=["vc_sheet"])
-def new_fund(db: Session = Depends(get_db)) -> JSONResponse:
-    funds, fund_rounds = vc_scraper_funds()
-
-    create_bulk_fund(db=db, funds=funds, fund_rounds=fund_rounds)
-
-    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
-
-
-@vc_sheet_router.get("/vc_sheet/funds", tags=["vc_sheet"])
-def get_funds(db: Session = Depends(get_db), page: int = 0, limit: int = 10):
-    return get_all_funds(db=db, page=page, limit=limit)
->>>>>>> e9755fee1d32a39fdada08c77f5afe7a5f10c5e7

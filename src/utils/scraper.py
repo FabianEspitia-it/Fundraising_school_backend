@@ -11,7 +11,8 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 
 
-def move_down(url: str, scroll_count: int) -> BeautifulSoup:
+def move_down(url:str, scroll_count: int) -> BeautifulSoup:
+
     """
     Scrolls down a webpage a specified number of times and returns the page source as a BeautifulSoup object.
 
@@ -23,10 +24,7 @@ def move_down(url: str, scroll_count: int) -> BeautifulSoup:
         BeautifulSoup: A BeautifulSoup object containing the HTML of the scrolled page.
     """
 
-    driver = webdriver.Remote(
-        options=webdriver.ChromeOptions(),
-        command_executor=os.getenv("WEBDRIVER_URL")
-    )
+    driver = webdriver.Chrome()  
 
     driver.get(url)
 
@@ -34,8 +32,9 @@ def move_down(url: str, scroll_count: int) -> BeautifulSoup:
 
     for _ in range(scroll_number):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)
+        time.sleep(3)  
 
+    
     html = driver.page_source
 
     driver.quit()
