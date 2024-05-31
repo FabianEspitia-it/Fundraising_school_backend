@@ -204,6 +204,7 @@ def get_all_partners(db: Session, page: int, limit: int):
     """
     return db.query(Partner).offset(page * 10).limit(limit).all()
 
+
 def create_bulk_reporters(db: Session, reporters: list[Reporter]) -> None:
     """
     Adds multiple Reporter objects to the database in bulk.

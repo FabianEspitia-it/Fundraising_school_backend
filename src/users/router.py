@@ -110,7 +110,10 @@ def user_new(new_user: NewUserReq, background_tasks: BackgroundTasks, db: Sessio
 
     if get_user_by_email(db=db, email=new_user.email):
         raise HTTPException(status_code=400, detail="Email registered")
+<<<<<<< HEAD
     
+=======
+>>>>>>> e9755fee1d32a39fdada08c77f5afe7a5f10c5e7
 
     background_tasks.add_task(user_scraper, db=db, req=new_user)
 

@@ -234,12 +234,11 @@ def vc_scraper_investors() -> None:
     
     soup = move_down(INVESTORS_URL, 35)
 
-
-    investor_name = soup.find_all("h3", class_="list-heading list-pages") 
+    investor_name = soup.find_all("h3", class_="list-heading list-pages")
     investor_photo = soup.find_all("div", class_="list-photo investor-cards _55")
     investor_role = soup.find_all("div", class_="html-embed w-embed")
     investor_description = soup.find_all("div", class_="shortdesccard more-top w-richtext")
-    investor_email = soup.find_all("a", class_="contact-icon email w-inline-block") 
+    investor_email = soup.find_all("a", class_="contact-icon email w-inline-block")
     investor_twitter = soup.find_all("a", class_="contact-icon x w-inline-block")
     investor_linkedin = soup.find_all("a", class_="contact-icon linkedin w-inline-block")
     investor_crunch_base = soup.find_all("a", class_="contact-icon crunchbase w-inline-block")
@@ -248,35 +247,33 @@ def vc_scraper_investors() -> None:
 
     final_investor_vc = []
 
-    
     for parent_div in investor_invest:
-       
-        filtered_pill_items = [div for div in parent_div.find_all('div', class_='pill-item') if div.get('class') == ['pill-item']]
-        
+        filtered_pill_items = [div for div in parent_div.find_all('div', class_='pill-item') if
+                               div.get('class') == ['pill-item']]
+
         final_investor_vc.append([item.get_text() for item in filtered_pill_items])
-    
-    investors : list[Investor] = []
+
+    investors: list[Investor] = []
 
     for n in range(0, len(investor_name)):
-        investor =Investor(
-            name = investor_name[n].text.strip() if n < len(investor_name) else None,
-            photo = str(investor_photo[n].get("style")).replace("background-image:url(", "")
+        investor = Investor(
+            name=investor_name[n].text.strip() if n < len(investor_name) else None,
+            photo=str(investor_photo[n].get("style")).replace("background-image:url(", "")
             .replace(")", "")
             .replace('"', '') if n < len(investor_photo) else None,
-            role = investor_role[n].text.strip(),
-            description = investor_description[n].text.strip() if n < len(investor_description) else None,
-            email = investor_email[n].get("href").replace("mailto:", "").replace("?subject=Pitch", "")
+            role=investor_role[n].text.strip(),
+            description=investor_description[n].text.strip() if n < len(investor_description) else None,
+            email=investor_email[n].get("href").replace("mailto:", "").replace("?subject=Pitch", "")
             if n < len(investor_email) else None,
-            twitter = investor_twitter[n].get("href") if n < len(investor_twitter) else None,
-            linkedin = investor_linkedin[n].get("href") if n < len(investor_linkedin) else None,
-            crunch_base = investor_crunch_base[n].get("href") if n< len(investor_crunch_base) else None,
-            youtube = investor_youtube[n].get("href") if n < len(investor_youtube) else None
+            twitter=investor_twitter[n].get("href") if n < len(investor_twitter) else None,
+            linkedin=investor_linkedin[n].get("href") if n < len(investor_linkedin) else None,
+            crunch_base=investor_crunch_base[n].get("href") if n < len(investor_crunch_base) else None,
+            youtube=investor_youtube[n].get("href") if n < len(investor_youtube) else None
         )
 
         investors.append(investor)
 
     return investors, final_investor_vc
-
 
 
 def vc_scraper_reporters() -> list[Reporter]:

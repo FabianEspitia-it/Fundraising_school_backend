@@ -3,9 +3,15 @@ from sqlalchemy.orm import Session
 
 from src.utils.scraper import internet_search, get_time_period, authenticate_linkedin
 from src.models import User, Education, Experience
+<<<<<<< HEAD
 
 from src.users.schemas import NewUserReq
 from src.users.crud import create_bulk_education, create_bulk_experience, create_user_principal_data
+=======
+from src.users.schemas import NewUserReq
+
+from src.users.crud import create_user, create_bulk_education, create_bulk_experience
+>>>>>>> e9755fee1d32a39fdada08c77f5afe7a5f10c5e7
 
 
 def search_linkedin_url(name: str) -> str | None:
@@ -51,7 +57,11 @@ def linkedin_public_identifier(url) -> str | None:
     return None
 
 
+<<<<<<< HEAD
 def scraper_linkedin_profile(db: Session, public_identifier: str, user_id: int) -> None:
+=======
+def scraper_linkedin_profile(db: Session, public_identifier: str, user: User) -> None:
+>>>>>>> e9755fee1d32a39fdada08c77f5afe7a5f10c5e7
     """
     Scrapes LinkedIn profile data and saves it to the database for the given user.
 
@@ -66,10 +76,14 @@ def scraper_linkedin_profile(db: Session, public_identifier: str, user_id: int) 
 
     followers_amount: int = len(linkedin_connect.get_profile_connections(public_identifier))
 
+<<<<<<< HEAD
     user = db.query(User).filter(User.id == user_id).first()
 
     #user.first_name = profile_data.get("firstName")
 
+=======
+    user.first_name = profile_data.get("firstName")
+>>>>>>> e9755fee1d32a39fdada08c77f5afe7a5f10c5e7
     user.last_name = profile_data.get("lastName")
     user.location = profile_data.get("locationName")
     user.headline = profile_data.get("headline")
@@ -77,6 +91,7 @@ def scraper_linkedin_profile(db: Session, public_identifier: str, user_id: int) 
     user.summary = profile_data.get("summary")
     user.followers_amount = followers_amount
 
+<<<<<<< HEAD
     db.commit()
     db.refresh(user)
 
@@ -126,6 +141,55 @@ def scraper_linkedin_profile(db: Session, public_identifier: str, user_id: int) 
     create_bulk_experience(db, experiences)
 
 
+=======
+    user_id = create_user(db, user)
+
+    education: list[Education] = []
+    for education_item in profile_data.get("education"):
+        print("[INFO] ", education_item)
+
+        linkedin_url = search_linkedin_url(education_item.get("schoolName"))
+
+        start_date, end_date = get_time_period(education_item)
+
+        education_to_save = Education(
+            school_name=education_item.get("schoolName"),
+            degree_name=education_item.get("degreeName"),
+            grade=education_item.get("grade"),
+            description=education_item.get("description"),
+            linkedin_url=linkedin_url,
+            start_date=start_date,
+            end_date=end_date,
+            user_id=user_id,
+        )
+
+        education.append(education_to_save)
+
+    create_bulk_education(db, education)
+
+    experiences: list[Experience] = []
+    for experience in profile_data["experience"]:
+        linkedin_url = search_linkedin_url(experience.get("companyName"))
+
+        start_date, end_date = get_time_period(experience)
+
+        experiences.append(
+            Experience(
+                linkedin_url=linkedin_url,
+                role=experience.get("title"),
+                company=experience.get("companyName"),
+                location=experience.get("locationName"),
+                description=experience.get("description"),
+                start_date=start_date,
+                end_date=end_date,
+                user_id=user_id
+            )
+        )
+
+    create_bulk_experience(db, experiences)
+
+
+>>>>>>> e9755fee1d32a39fdada08c77f5afe7a5f10c5e7
 def user_scraper(db: Session, req: NewUserReq) -> None:
     """
     Scrapes LinkedIn profile data for a new user and saves it to the database.
@@ -144,16 +208,28 @@ def user_scraper(db: Session, req: NewUserReq) -> None:
 
     linkedin_url = search_linkedin_url(req.name)
     if not linkedin_url:
+<<<<<<< HEAD
         create_user_principal_data(db, user)
+=======
+        create_user(db, user)
+>>>>>>> e9755fee1d32a39fdada08c77f5afe7a5f10c5e7
         return None
 
     user.linkedin_url = linkedin_url
 
     user_public_identifier = linkedin_public_identifier(linkedin_url)
     if not user_public_identifier:
+<<<<<<< HEAD
         create_user_principal_data(db, user)
+=======
+        create_user(db, user)
+>>>>>>> e9755fee1d32a39fdada08c77f5afe7a5f10c5e7
         return None
     
     user_id = create_user_principal_data(db, req)
 
+<<<<<<< HEAD
     scraper_linkedin_profile(db, user_public_identifier, user_id)
+=======
+    scraper_linkedin_profile(db, user_public_identifier, user)
+>>>>>>> e9755fee1d32a39fdada08c77f5afe7a5f10c5e7
