@@ -1,33 +1,45 @@
 from sqlalchemy.orm import Session
-from src.users.linkedin_scraper import linkedin_data
 
-from src.models import User
+from src.users.schemas import NewUserReq
 
-
-def get_email(db: Session, email: str):
-    return db.query(User).filter(User.email == email).first()
+import src.models as models
 
 
-def create_user(db: Session, email: str, name: str, photo_url: str):
+def get_user_by_email(db: Session, email: str) -> models.User:
+    return db.query(models.User).filter(models.User.email == email).first()
 
-    db_user = User(email=email, name=name, photo_url=photo_url)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
 
-    user_data = linkedin_data(full_name=name)
-    user = get_email(db, email)
-
-    user.linkedin_url = user_data["linkedin_url"]
-    user.followers_amount = user_data["followers_amount"]
-    
-
-    
-    
-
-def create_user_additional_data(db: Session, email: str, nickname: str, contact_email: str):
-    user = get_email(db, email)
-    user.nickname = nickname
-    user.contact_email = contact_email
+def create_user_principal_data(db: Session, new_user: NewUserReq) -> int:
+    user = models.User(first_name = new_user.name.split()[0], email=new_user.email, photo_url=new_user.linkedin_picture)
+    db.add(user)
     db.commit()
     db.refresh(user)
+
+    return user.id
+
+
+"""
+def create_user(db: Session, user: models.User) -> int:
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return user.id
+"""
+
+def get_education_by_user_email(db: Session, email: str) -> list[models.Education]:
+    return db.query(models.Education).join(models.User).filter(models.User.email == email).all()
+
+
+def get_experience_by_user_email(db: Session, email: str) -> list[models.Education]:
+    return db.query(models.Experience).join(models.User).filter(models.User.email == email).all()
+
+
+def create_bulk_education(db: Session, education: list[models.Education]) -> None:
+    db.add_all(education)
+    db.commit()
+
+
+def create_bulk_experience(db: Session, experiences: list[models.Experience]) -> None:
+    db.add_all(experiences)
+    db.commit()

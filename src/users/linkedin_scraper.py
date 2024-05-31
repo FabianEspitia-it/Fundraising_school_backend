@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 
 from src.utils.scraper import internet_search, get_time_period, authenticate_linkedin
 from src.models import User, Education, Experience
-from src.users.schemas import NewUserReq
 
-from src.users.crud import create_user, create_bulk_education, create_bulk_experience
+from src.users.schemas import NewUserReq
+from src.users.crud import create_bulk_education, create_bulk_experience, create_user_principal_data
 
 
 def search_linkedin_url(name: str) -> str | None:
@@ -51,7 +51,7 @@ def linkedin_public_identifier(url) -> str | None:
     return None
 
 
-def scraper_linkedin_profile(db: Session, public_identifier: str, user: User) -> None:
+def scraper_linkedin_profile(db: Session, public_identifier: str, user_id: int) -> None:
     """
     Scrapes LinkedIn profile data and saves it to the database for the given user.
 
@@ -66,7 +66,10 @@ def scraper_linkedin_profile(db: Session, public_identifier: str, user: User) ->
 
     followers_amount: int = len(linkedin_connect.get_profile_connections(public_identifier))
 
-    user.first_name = profile_data.get("firstName")
+    user = db.query(User).filter(User.id == user_id).first()
+
+    #user.first_name = profile_data.get("firstName")
+
     user.last_name = profile_data.get("lastName")
     user.location = profile_data.get("locationName")
     user.headline = profile_data.get("headline")
@@ -74,7 +77,9 @@ def scraper_linkedin_profile(db: Session, public_identifier: str, user: User) ->
     user.summary = profile_data.get("summary")
     user.followers_amount = followers_amount
 
-    user_id = create_user(db, user)
+    db.commit()
+    db.refresh(user)
+
 
     education: list[Education] = []
     for education_item in profile_data.get("education"):
@@ -139,14 +144,16 @@ def user_scraper(db: Session, req: NewUserReq) -> None:
 
     linkedin_url = search_linkedin_url(req.name)
     if not linkedin_url:
-        create_user(db, user)
+        create_user_principal_data(db, user)
         return None
 
     user.linkedin_url = linkedin_url
 
     user_public_identifier = linkedin_public_identifier(linkedin_url)
     if not user_public_identifier:
-        create_user(db, user)
+        create_user_principal_data(db, user)
         return None
+    
+    user_id = create_user_principal_data(db, req)
 
-    scraper_linkedin_profile(db, user_public_identifier, user)
+    scraper_linkedin_profile(db, user_public_identifier, user_id)

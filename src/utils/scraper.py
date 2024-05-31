@@ -1,15 +1,17 @@
+import os
 import requests
 import time
+import datetime
+
+from linkedin_api import Linkedin
 
 from src.utils.constants import SEARCH_URL
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
-
 from selenium import webdriver
 
 
-def move_down(url:str, scroll_count: int) -> BeautifulSoup:
-
+def move_down(url: str, scroll_count: int) -> BeautifulSoup:
     """
     Scrolls down a webpage a specified number of times and returns the page source as a BeautifulSoup object.
 
@@ -21,7 +23,10 @@ def move_down(url:str, scroll_count: int) -> BeautifulSoup:
         BeautifulSoup: A BeautifulSoup object containing the HTML of the scrolled page.
     """
 
-    driver = webdriver.Chrome()  
+    driver = webdriver.Remote(
+        options=webdriver.ChromeOptions(),
+        command_executor=os.getenv("WEBDRIVER_URL")
+    )
 
     driver.get(url)
 
@@ -29,9 +34,8 @@ def move_down(url:str, scroll_count: int) -> BeautifulSoup:
 
     for _ in range(scroll_number):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(3)  
+        time.sleep(2)
 
-    
     html = driver.page_source
 
     driver.quit()
@@ -71,3 +75,54 @@ def get_html(url: str) -> BeautifulSoup:
     html = urlopen(url).read().decode("utf-8")
 
     return BeautifulSoup(html, "html.parser")
+
+
+def get_time_period(values: dict) -> tuple[None | datetime.datetime, None | datetime.datetime]:
+    """
+    Extracts start and end dates from a dictionary representing a time period.
+
+    Args:
+        values (dict): A dictionary containing information about the time period, including start date and end date.
+
+    Returns: tuple[None | datetime.datetime, None | datetime.datetime]: A tuple containing the start date and end
+    date of the time period. If the start date or end date is not provided in the input dictionary, it will be
+    returned as None.
+    """
+    start_date: None | datetime.datetime = None
+    end_date: None | datetime.datetime = None
+
+    if values.get("timePeriod"):
+        if values["timePeriod"].get("startDate"):
+            start_year = values["timePeriod"]["startDate"].get("year", 0)
+            start_month = values["timePeriod"]["startDate"].get("month", 0)
+
+            start_date = datetime.datetime(start_year, start_month, 1)
+
+        if values["timePeriod"].get("endDate"):
+            end_year = values["timePeriod"]["endDate"].get("year", 0)
+            end_month = values["timePeriod"]["endDate"].get("month", 0)
+
+            end_date = datetime.datetime(end_year, end_month, 1)
+
+    return start_date, end_date
+
+
+def authenticate_linkedin() -> Linkedin:
+    """
+    Authenticates the user with LinkedIn using environment variables for username and password.
+
+    Returns:
+        LinkedIn: An authenticated instance of the LinkedIn class.
+    """
+    linkedin_connect = None
+
+    while not linkedin_connect:
+        try:
+            #linkedin_connect = Linkedin(os.getenv("LINKEDIN_USER"), os.getenv("LINKEDIN_PASSWORD"))
+            linkedin_connect = Linkedin("fabian@makers.ngo ", "M#Build#M" )
+        except Exception as e:
+            print(f"[WARNING] Error while authenticating LinkedIn: {e}")
+
+            time.sleep(2.0)
+
+    return linkedin_connect
