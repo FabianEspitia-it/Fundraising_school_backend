@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 
 from src.database import get_db
@@ -24,6 +24,29 @@ def get_funds(db: Session = Depends(get_db), page: int = 0, limit: int = 10):
     """
     return get_all_funds(db=db, page=page, limit=limit)
 
+
+@vc_sheet_router.get("/vc_sheet/funds/{fund_id}", tags=["vc_sheet"])
+def get_fund(fund_id: int, db: Session = Depends(get_db)):
+    """
+    Retrieve a specific venture capital fund.
+
+    Args:
+        fund_id (int): The unique identifier of the fund.
+        db (Session, optional): Database session dependency.
+
+    Returns:
+        JSONResponse: A JSON response containing the fund information.
+
+    Raises:
+        HTTPException: If the fund does not exist (status code 404).
+    
+    """
+    fund = get_fund_by_id(db=db, fund_id=fund_id)
+
+    if not fund:
+        raise HTTPException(status_code=404, detail="Fund not found")
+
+    return fund
 
 @vc_sheet_router.post("/vc_sheet/funds/add", tags=["vc_sheet"])
 def new_fund(db: Session = Depends(get_db)) -> JSONResponse:
@@ -68,6 +91,28 @@ def new_partner(db: Session = Depends(get_db)) -> JSONResponse:
     add_partners_information(db=db)
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+@vc_sheet_router.get("/vc_sheet/partners/{partner_id}", tags=["vc_sheet"])
+def get_partner(partner_id: int, db: Session = Depends(get_db)):
+    """
+    Retrieve a specific partner.
+
+    Args:
+        partner_id (int): The unique identifier of the partner.
+        db (Session, optional): Database session dependency.
+
+    Returns:
+        JSONResponse: A JSON response containing the partner information.
+
+    Raises:
+        HTTPException: If the partner does not exist (status code 404).
+    """
+    partner = get_partner_by_id(db=db, partner_id=partner_id)
+
+    if not partner:
+        raise HTTPException(status_code=404, detail="Partner not found")
+
+    return partner
 
 """
 ROUTES THAT WE DONT NEED AT THE MOMENT

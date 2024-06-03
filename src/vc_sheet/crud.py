@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from src.models import *
 from src.vc_sheet.vc_scraper import vc_scraper_partners
@@ -187,7 +187,7 @@ def add_partners_information(db: Session):
         partner.website = partner_dict["website"]
         db.commit()
         db.refresh(partner)
-        print("added")
+        print(f"added: {partner_id} partner")
         partner_id += 1
 
 def get_all_partners(db: Session, page: int, limit: int):
@@ -261,6 +261,26 @@ def create_bulk_investors(db: Session, investors: list[Investor], investor_round
 def get_all_investors(db: Session, page: int, limit: int):
     return db.query(Investor).offset(page * 10).limit(limit).all()
 
+
+def get_fund_by_id(db: Session, fund_id: int):
+    return db.query(Fund).options(
+        joinedload(Fund.rounds),
+        joinedload(Fund.partners),
+        joinedload(Fund.check_size),
+        joinedload(Fund.countries),
+        joinedload(Fund.sectors)
+    ).filter(Fund.id == fund_id).first()
+
+
+def get_partner_by_id(db: Session, partner_id: int):
+    return db.query(Partner).options(
+        joinedload(Partner.funds).options(
+            joinedload(Fund.rounds),
+            joinedload(Fund.check_size),
+            joinedload(Fund.countries),
+            joinedload(Fund.sectors)
+        )
+    ).filter(Partner.id == partner_id).first()
 
        
 
