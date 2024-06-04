@@ -33,16 +33,16 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
     fund_id = 1
 
     print("Processing fund rounds...")
-    for i in fund_rounds:
-        for j in i:
-            round = db.query(Round).filter(Round.stage == j).first()
+    for rounds in fund_rounds:
+        for round_stage in rounds:
+            round = db.query(Round).filter(Round.stage == round_stage).first()
             
             if not round:
-                round = Round(stage=j)
+                round = Round(stage=round_stage)
                 db.add(round)
                 db.commit()
                 db.refresh(round)
-                print(f"New round created and committed: {j}")
+                print(f"New round created and committed: {round_stage}")
             
             existing_association = db.query(FundRound).filter_by(fund_id=fund_id, round_id=round.id).first()
             if existing_association is None:
@@ -54,16 +54,16 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
     fund_id = 1
 
     print("Processing fund countries...")
-    for n in fund_countries:
-        for m in n:
-            country = db.query(Country).filter(Country.name == m).first()
+    for countries in fund_countries:
+        for country_name in countries:
+            country = db.query(Country).filter(Country.name == country_name).first()
             
             if not country:
-                country = Country(name=m)
+                country = Country(name=country_name)
                 db.add(country)
                 db.commit()
                 db.refresh(country)
-                print(f"New country created and committed: {m}")
+                print(f"New country created and committed: {country_name}")
             
             existing_association = db.query(FundCountry).filter_by(fund_id=fund_id, country_id=country.id).first()
             if existing_association is None:
@@ -75,15 +75,15 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
     fund_id = 1
 
     print("Processing fund partners...")
-    for a in fund_partners:
-        for name in a:
-            partner = db.query(Partner).filter(Partner.name == name).first()
+    for partners in fund_partners:
+        for partner_name in partners:
+            partner = db.query(Partner).filter(Partner.name == partner_name).first()
             if not partner:
-                partner = Partner(name=name)
+                partner = Partner(name=partner_name)
                 db.add(partner)
                 db.commit()
                 db.refresh(partner)
-                print(f"New partner created and committed: {name}")
+                print(f"New partner created and committed: {partner_name}")
             existing_association = db.query(FundPartner).filter_by(fund_id=fund_id, partner_id=partner.id).first()
             if existing_association is None:
                 db.add(FundPartner(fund_id=fund_id, partner_id=partner.id))
@@ -94,15 +94,15 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
     fund_id = 1
 
     print("Processing fund check sizes...")
-    for c in fund_check_size:
-        for d in c:
-            check = db.query(CheckSize).filter(CheckSize.size == d).first()
+    for check_sizes in fund_check_size:
+        for check_size in check_sizes:
+            check = db.query(CheckSize).filter(CheckSize.size == check_size).first()
             if not check:
-                check = CheckSize(size=d)
+                check = CheckSize(size=check_size)
                 db.add(check)
                 db.commit()
                 db.refresh(check)
-                print(f"New check size created and committed: {d}")
+                print(f"New check size created and committed: {check_size}")
             existing_association = db.query(FundCheckSize).filter_by(fund_id=fund_id, check_size_id=check.id).first()
             if existing_association is None:
                 db.add(FundCheckSize(fund_id=fund_id, check_size_id=check.id))
@@ -113,15 +113,15 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
     fund_id = 1
 
     print("Processing fund sectors...")
-    for e in fund_sectors:
-        for f in e:
-            sector = db.query(Sector).filter(Sector.name == f).first()
+    for sectors in fund_sectors:
+        for sector_name in sectors:
+            sector = db.query(Sector).filter(Sector.name == sector_name).first()
             if not sector:
-                sector = Sector(name=f)
+                sector = Sector(name=sector_name)
                 db.add(sector)
                 db.commit()
                 db.refresh(sector)
-                print(f"New sector created and committed: {f}")
+                print(f"New sector created and committed: {sector_name}")
             existing_association = db.query(FundSector).filter_by(fund_id=fund_id, sector_id=sector.id).first()
             if existing_association is None:
                 db.add(FundSector(fund_id=fund_id, sector_id=sector.id))
@@ -132,15 +132,15 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
     fund_id = 1
 
     print("Updating partner links...")
-    for g in partner_links:
-        for h in g:
+    for partner_links_group in partner_links:
+        for partner_link in partner_links_group:
             partner = db.query(Partner).filter(Partner.id == fund_id).first()
             
             if partner:
-                partner.vc_link = h
+                partner.vc_link = partner_link
                 db.commit()
                 db.refresh(partner)
-                print(f"Partner link updated for partner_id={fund_id}, vc_link={h}")
+                print(f"Partner link updated for partner_id={fund_id}, vc_link={partner_link}")
             
             fund_id += 1
     
@@ -172,7 +172,7 @@ def add_partners_information(db: Session):
     """
     partner_id = 1
 
-    for n in range(2587):
+    for _ in range(2588):
         partner = db.query(Partner).filter(Partner.id == partner_id).first()
 
         partner_dict = vc_scraper_partners(partner.vc_link)
@@ -259,10 +259,31 @@ def create_bulk_investors(db: Session, investors: list[Investor], investor_round
 
 
 def get_all_investors(db: Session, page: int, limit: int):
+    """
+    Retrieves a paginated list of all investors from the database.
+
+    Args:
+        db (Session): The database session to use for the query.
+        page (int): The page number to retrieve.
+        limit (int): The maximum number of investors to return per page.
+
+    Returns:
+        List[Investor]: A list of Investor objects.
+    """
     return db.query(Investor).offset(page * 10).limit(limit).all()
 
 
 def get_fund_by_id(db: Session, fund_id: int):
+    """
+    Retrieves a fund by its ID, along with its related rounds, partners, check size, countries, and sectors.
+
+    Args:
+        db (Session): The database session to use for the query.
+        fund_id (int): The ID of the fund to retrieve.
+
+    Returns:
+        Fund: The Fund object corresponding to the given ID, or None if not found.
+    """
     return db.query(Fund).options(
         joinedload(Fund.rounds),
         joinedload(Fund.partners),
@@ -273,6 +294,16 @@ def get_fund_by_id(db: Session, fund_id: int):
 
 
 def get_partner_by_id(db: Session, partner_id: int):
+    """
+    Retrieves a partner by its ID, along with the funds they are associated with and the related rounds, check size, countries, and sectors for each fund.
+
+    Args:
+        db (Session): The database session to use for the query.
+        partner_id (int): The ID of the partner to retrieve.
+
+    Returns:
+        Partner: The Partner object corresponding to the given ID, or None if not found.
+    """
     return db.query(Partner).options(
         joinedload(Partner.funds).options(
             joinedload(Fund.rounds),
@@ -281,6 +312,7 @@ def get_partner_by_id(db: Session, partner_id: int):
             joinedload(Fund.sectors)
         )
     ).filter(Partner.id == partner_id).first()
+
 
        
 
