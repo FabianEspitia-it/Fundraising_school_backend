@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 
 from src.database import get_db
 from src.vc_sheet.crud import *
+from src.vc_sheet.test import get_investor_info
 from src.vc_sheet.vc_scraper import *
 
 vc_sheet_router = APIRouter()
@@ -113,6 +114,24 @@ def get_partner(partner_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Partner not found")
 
     return partner
+
+
+@vc_sheet_router.post("/vc_sheet/crm_investors", tags=["vc_sheet"])
+def new_investor(db: Session = Depends(get_db)) -> JSONResponse:
+    """
+    Scrape and add new investors to the database.
+
+    Args:
+        db (Session, optional): Database session dependency.
+
+    Returns:
+        JSONResponse: A JSON response indicating the creation status.
+    """
+    investors = get_investor_info()
+
+    create_bulk_investors(db=db, crm_investors=investors)
+
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
 """
 ROUTES THAT WE DONT NEED AT THE MOMENT

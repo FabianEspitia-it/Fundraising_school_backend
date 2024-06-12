@@ -314,6 +314,65 @@ def get_partner_by_id(db: Session, partner_id: int):
     ).filter(Partner.id == partner_id).first()
 
 
+def create_bulk_crm_investors(db: Session, crm_investors: list[dict]) -> None:
+    """
+    Adds multiple CRMInvestor objects to the database in bulk.
+
+    Args:
+        db (Session): Database session object.
+        crm_investors (list[dict]): List of CRMInvestor objects to be added.
+
+    Returns:
+        None
+    """
+
+    investor_id_count = 1
+
+    for investor in crm_investors:
+        db.add(CrmInvestor(
+            name=investor["name"],
+            location=investor["location"],
+            role=investor["role"],
+            vc_link=investor["vc_link"],
+            photo=investor["photo"],
+            linkedin_investor=investor["investor_linkedin"],
+        ))
+
+        for sector in investor["sector_and_stage"]:
+            sector = db.query(CrmSectorAndStage).filter(CrmSectorAndStage.name == sector).first()
+            if not sector:
+                sector = CrmSectorAndStage(name=sector)
+                db.add(sector)
+                db.commit()
+                db.refresh(sector)
+                print(f"New sector created and committed: {sector}")
+            existing_association = db.query(CrmInvestorSectorAndStage).filter_by(investor_id=investor_id_count, sector_id=sector.id).first()
+            if existing_association is None:
+                db.add(CrmInvestorSectorAndStage(investor_id=investor["id"], sector_id=sector.id))
+                db.commit()
+                print(f"CrmInvestorSector association created: investor_id={investor['id']}, sector_id={sector.id}")
+        
+        for invest_range in investor["invest_range_final"]:
+            invest_range = db.query(CrmInvestRange).filter(CrmInvestRange.size == invest_range).first()
+            if not invest_range:
+                invest_range = CrmInvestRange(size=invest_range)
+                db.add(invest_range)
+                db.commit()
+                db.refresh(invest_range)
+                print(f"New invest range created and committed: {invest_range}")
+            existing_association = db.query(CrmInvestorInvestRange).filter_by(investor_id=investor_id_count, invest_range_id=invest_range.id).first()
+            if existing_association is None:
+                db.add(CrmInvestorInvestRange(investor_id=investor["id"], invest_range_id=invest_range.id))
+                db.commit()
+                print(f"CrmInvestorInvestRange association created: investor_id={investor['id']}, invest_range_id={invest_range.id}")
+
+        investor_id_count += 1
+
+    db.commit()
+
+   
+
+
        
 
 

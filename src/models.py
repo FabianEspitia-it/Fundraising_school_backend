@@ -226,4 +226,52 @@ class Fund(Base):
     sectors = relationship("Sector", secondary="fund_sectors", back_populates='funds', overlaps="sector")
     check_size = relationship("CheckSize", secondary="fund_check_size", back_populates='funds', overlaps="check_size")
 
+
+class CrmInvestorInvestRange(Base):
+    __tablename__ = "crm_investor_invest_range"
+    
+    crm_investor_id = Column(Integer, ForeignKey("crm_investor.id"), primary_key=True)
+    crm_invest_range_id = Column(Integer, ForeignKey("crm_invest_range.id"), primary_key=True)
+
+    crm_investor = relationship("CrmInvestor", back_populates="invest_range")
+    crm_invest_range = relationship("CrmInvestRange", back_populates="crm_investor")
+
+class CrmInvestorSectorAndStage(Base):
+    __tablename__ = "crm_investor_sector_and_stage"
+    
+    crm_investor_id = Column(Integer, ForeignKey("crm_investor.id"), primary_key=True)
+    crm_sector_and_stage_id = Column(Integer, ForeignKey("crm_sector_and_stage.id"), primary_key=True)
+
+    crm_investor = relationship("CrmInvestor", back_populates="sector_and_stage")
+    crm_sector_and_stage = relationship("CrmSectorAndStage", back_populates="crm_investor")
+
+class CrmInvestRange(Base):
+    __tablename__ = "crm_invest_range"
+    id = Column(Integer, primary_key=True)
+    range = Column(String(100), nullable=False)
+
+    crm_investor = relationship("CrmInvestor", back_populates="invest_range")
+
+
+class CrmSectorAndStage(Base):
+    __tablename__ = "crm_sector_and_stage"
+    id = Column(Integer, primary_key=True)
+    sector = Column(String(100), nullable=False)
+    stage = Column(String(100), nullable=False)
+
+    crm_investor = relationship("CrmInvestor", back_populates="sector_and_stage")
+
+class CrmInvestor(Base):
+    __tablename__ = "crm_investor"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    location = Column(String(100), nullable=True)
+    role = Column(Text, nullable=True)
+    vc_link = Column(String(255), nullable=True)
+    photo = Column(Text, nullable=True)
+    linkedin_investor = Column(Text, nullable=True)
+    
+    invest_range = relationship("CrmInvestRange", secondary="crm_invest_range", back_populates="crm_investor")
+    sector_and_stage = relationship("CrmSectorAndStage", secondary="crm_sector_and_stage", back_populates="crm_investor")
+
 Base.metadata.create_all(bind=engine)
