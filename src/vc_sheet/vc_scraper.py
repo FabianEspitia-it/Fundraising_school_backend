@@ -55,7 +55,7 @@ def vc_scraper_funds():
 
     for n in range(0, len(fund_name)):
 
-        additional_info = fund_additional_data(f"https://www.vcsheet.com{fund_link[n].get("href")}")
+        additional_info = fund_additional_data(f"https://www.vcsheet.com{fund_link[n].get('href')}")
 
         fund = Fund(
             name= fund_name[n].text.strip() if n < len(fund_name) else None,

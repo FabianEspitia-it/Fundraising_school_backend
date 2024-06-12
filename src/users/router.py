@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from src.database import get_db
 from src.users.linkedin_scraper import user_scraper
 
-from src.users.schemas import NewUserReq
+from src.users.schemas import ContactUserReq, ImageUserReq, NewUserReq, RoundUserReq
 from src.users.crud import *
 
 from src.utils.validations import check_email
@@ -86,6 +86,88 @@ def get_user_experience(email: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Not Found")
 
     return user_experience
+
+
+@user.post("/user/contact", tags=["users"])
+def update_contact_user_info(contact_user: ContactUserReq, db: Session = Depends(get_db)):
+    """
+    Update contact info of an user.
+
+    Args:
+        contact_user (ContactUserReq): The user contact info request containing user details.
+        db (Session): The database session dependency.
+
+    Returns:
+        JSONResponse: A JSON response indicating that the user was updated.
+
+    Raises:
+        HTTPException: If the email is invalid (status code 400).
+        HTTPException: If the contact email is invalid (status code 400).
+    """
+    if not check_email(contact_user.contact_email):
+        raise HTTPException(status_code=400, detail="Invalid Contact Email")
+
+    if not check_email(contact_user.email):
+        raise HTTPException(status_code=400, detail="Invalid Email")
+
+    amount_rows = update_contact_info_user_by_email(db, contact_user.email, contact_user.contact_email, contact_user.nickname)
+
+    if amount_rows == 0:
+        raise HTTPException(status_code=404, detail="Not Found")
+
+    return JSONResponse(content={"response": "updated"}, status_code=status.HTTP_200_OK)
+
+
+@user.post("/user/image", tags=["users"])
+def update_contact_user_info(image_user: ImageUserReq, db: Session = Depends(get_db)):
+    """
+    Update image url of an user.
+
+    Args:
+        image_user (ImageUserReq): The user info request containing user details.
+        db (Session): The database session dependency.
+
+    Returns:
+        JSONResponse: A JSON response indicating that the user was updated.
+
+    Raises:
+        HTTPException: If the email is invalid (status code 400).
+    """
+    if not check_email(image_user.email):
+        raise HTTPException(status_code=400, detail="Invalid Email")
+
+    amount_rows = update_image_url_by_email(db, image_user.email, image_user.image)
+
+    if amount_rows == 0:
+        raise HTTPException(status_code=404, detail="Not Found")
+
+    return JSONResponse(content={"response": "updated"}, status_code=status.HTTP_200_OK)
+
+@user.post("/user/round", tags=["users"])
+def update_round_user_info(round_user: RoundUserReq, db: Session = Depends(get_db)):
+    """
+    Update round info of an user.
+
+    Args:
+        round_user (NewUserReq): The user round info request containing user details.
+        db (Session): The database session dependency.
+
+    Returns:
+        JSONResponse: A JSON response indicating that the user was updated.
+
+    Raises:
+        HTTPException: If the email is invalid (status code 400).
+        HTTPException: If the email is not found (status code 404).
+    """
+    if not check_email(round_user.email):
+        raise HTTPException(status_code=400, detail="Invalid Email")
+
+    amount_rows = update_round_info_user_by_email(db, round_user.email, round_user.seeking_capital, round_user.accept_terms_and_condition, round_user.round_name)
+
+    if amount_rows == 0:
+        raise HTTPException(status_code=404, detail="Not Found")
+
+    return JSONResponse(content={"response": "updated"}, status_code=status.HTTP_200_OK)
 
 
 @user.post("/user/new", tags=["users"])

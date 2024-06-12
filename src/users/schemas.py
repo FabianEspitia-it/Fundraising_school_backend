@@ -9,18 +9,26 @@ class NewUserReq(BaseModel):
     email: str
     linkedin_picture: Union[str, None] = None
 
-
-class ValidUserRes(BaseModel):
-    is_user_saved: bool
-    error: str | None = None
-
-
 class NewUserRes(BaseModel):
     error: str | None = None
 
+class RoundUserReq(BaseModel):
+    email: str
+    seeking_capital: bool
+    accept_terms_and_condition: bool
+    round_name: Union[str, None] = None
+
+class ContactUserReq(BaseModel):
+    nickname: str
+    email: str
+    contact_email: str
+
+class ImageUserReq(BaseModel):
+    email: str
+    image: str
+
 
 # BD SCHEMAS 
-
 
 class User(BaseModel):
     id: int

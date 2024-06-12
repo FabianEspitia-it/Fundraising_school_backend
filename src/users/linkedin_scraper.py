@@ -61,14 +61,16 @@ def scraper_linkedin_profile(db: Session, public_identifier: str, user_id: int) 
         user (User): The user object to which the scraped LinkedIn profile data will be associated.
     """
     linkedin_connect = authenticate_linkedin()
+    if not linkedin_connect:
+        print("[ERROR] Not possible scraper linkedin data: ", user_id)
+        return 
+
 
     profile_data: dict = linkedin_connect.get_profile(public_identifier)
 
     followers_amount: int = len(linkedin_connect.get_profile_connections(public_identifier))
 
     user = db.query(User).filter(User.id == user_id).first()
-
-    #user.first_name = profile_data.get("firstName")
 
     user.last_name = profile_data.get("lastName")
     user.location = profile_data.get("locationName")
@@ -83,8 +85,6 @@ def scraper_linkedin_profile(db: Session, public_identifier: str, user_id: int) 
 
     education: list[Education] = []
     for education_item in profile_data.get("education"):
-        print("[INFO] ", education_item)
-
         linkedin_url = search_linkedin_url(education_item.get("schoolName"))
 
         start_date, end_date = get_time_period(education_item)
