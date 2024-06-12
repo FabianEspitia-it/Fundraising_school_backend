@@ -7,7 +7,6 @@ from src.utils.scraper import move_down
 
 
 def vc_scraper_funds():
-
     """
     Scrapes information about venture capital funds from a specified URL.
 
@@ -22,31 +21,46 @@ def vc_scraper_funds():
             - "partner_links" (list[list[str]]): A list of links to partner profiles for each fund.
     """
 
-    soup = move_down(FUNDS_URL, 10)
+    print("Start scraping process")
 
+    soup = move_down(FUNDS_URL, 10)
+    print("Moved down the page")
 
     fund_link = soup.find_all("a", class_="full-click w-inline-block")
+    print("Found fund links")
+
     fund_name = soup.find_all("h3", class_="list-heading list-pages")
+    print("Found fund names")
+
     fund_description = soup.find_all("div", class_="shortdesccard w-richtext")
+    print("Found fund descriptions")
+
     fund_photo = soup.find_all("div", class_="list-photo investor-cards _55")
+    print("Found fund photos")
+
     fund_website = soup.find_all("a", class_="contact-icon site-link w-inline-block")
+    print("Found fund websites")
+
     fund_twitter = soup.find_all("a", class_="contact-icon x w-inline-block")
+    print("Found fund Twitter links")
+
     fund_linkedin = soup.find_all("a", class_="contact-icon linkedin w-inline-block")
+    print("Found fund LinkedIn links")
+
     fund_crunch_base = soup.find_all("a", class_="contact-icon crunchbase w-inline-block")
+    print("Found fund Crunchbase links")
+
     fund_invest = soup.find_all("div", class_="align-row no-sho-mo")
+    print("Found fund investment information")
 
     final_fund_invest: list[list[str]] = []
 
-    
     for parent_div in fund_invest:
-       
         filtered_pill_items = [div for div in parent_div.find_all('div', class_='pill-item') if div.get('class') == ['pill-item']]
-        
         final_fund_invest.append([item.get_text() for item in filtered_pill_items])
+    print("Processed investment information")
 
-
-    funds : list[Fund] = []
-
+    funds: list[Fund] = []
     fund_sectors = []
     fund_countries_invest = []
     check_size_range = []
@@ -54,23 +68,24 @@ def vc_scraper_funds():
     partner_links = []
 
     for n in range(0, len(fund_name)):
+        print(f"Processing fund {n+1}/{len(fund_name)}")
 
         additional_info = fund_additional_data(f"https://www.vcsheet.com{fund_link[n].get('href')}")
+        additional_info = fund_additional_data(f"https://www.vcsheet.com{fund_link[n].get('href')}")
+        print("Retrieved additional fund data")
 
         fund = Fund(
-            name= fund_name[n].text.strip() if n < len(fund_name) else None,
-            description = fund_description[n].text.strip() if n < len(fund_description) else None,
-            photo = str(fund_photo[n].get("style")).replace("background-image:url(", "")
-            .replace(")", "")
-            .replace('"', '') if n < len(fund_photo) else None,
-            website = fund_website[n].get("href") if n < len(fund_website) else None,
-            twitter = fund_twitter[n].get("href") if n < len(fund_twitter) else None,
-            linkedin = fund_linkedin[n].get("href") if n < len(fund_linkedin) else None,
-            crunch_base = fund_crunch_base[n].get("href") if n < len(fund_crunch_base) else None,
-            contact = additional_info.get("contact"),
-            location = additional_info.get("location")
-                 
+            name=fund_name[n].text.strip() if n < len(fund_name) else None,
+            description=fund_description[n].text.strip() if n < len(fund_description) else None,
+            photo=str(fund_photo[n].get("style")).replace("background-image:url(", "").replace(")", "").replace('"', '') if n < len(fund_photo) else None,
+            website=fund_website[n].get("href") if n < len(fund_website) else None,
+            twitter=fund_twitter[n].get("href") if n < len(fund_twitter) else None,
+            linkedin=fund_linkedin[n].get("href") if n < len(fund_linkedin) else None,
+            crunch_base=fund_crunch_base[n].get("href") if n < len(fund_crunch_base) else None,
+            contact=additional_info.get("contact"),
+            location=additional_info.get("location")
         )
+        print(f"Created Fund object for fund {n+1}")
 
         fund_sectors.append(additional_info.get("sector_focus"))
         fund_countries_invest.append(additional_info.get("countries_invest_in"))
@@ -79,12 +94,13 @@ def vc_scraper_funds():
         partner_links.append(additional_info.get("partner_links"))
 
         funds.append(fund)
+        print(f"Appended fund {n+1} to the funds list")
 
+    print("Finished processing all funds")
     return funds, final_fund_invest, fund_sectors, fund_countries_invest, check_size_range, partner_names, partner_links
 
 
-def fund_additional_data(url:str) -> dict:
-
+def fund_additional_data(url: str) -> dict:
     """
     Scrapes additional information about a specific venture capital fund from a given URL.
 
@@ -102,9 +118,9 @@ def fund_additional_data(url:str) -> dict:
             - "partner_names" (list[str]): Names of the partners in the fund.
             - "partner_links" (list[str]): Links to the profiles of the partners.
     """
-
-
+    print(f"Scraping additional data for URL: {url}")
     soup = get_html(url)
+    print(f"Retrieved HTML content for URL: {url}")
 
     all_sections = soup.find_all("div", class_="quick-view-row")
     fund_contact = soup.find("div", class_="quick-deal-response right")
@@ -112,22 +128,18 @@ def fund_additional_data(url:str) -> dict:
     final_fund_location = "".join([div.text.strip() for div in fund_location if "right" not in div.get("class", [])])
     check_size_range = []
     lead_in = []
-    sector_focus= []
+    sector_focus = []
     countries_invest_in = []
-
 
     partner_names = []
     partner_links = soup.find_all("a", class_="mini-profile-overlay fund-p w-inline-block")
 
-
-
-
     partners_headings = soup.find_all("div", class_="list-heading")
     partners_titles = soup.find_all("div", class_="list-title")
 
-
     for heading, _ in zip(partners_headings, partners_titles):
-            partner_names.append(heading.text.strip())
+        partner_names.append(heading.text.strip())
+    print(f"Retrieved partner names and titles for URL: {url}")
 
     counter: int = 0
 
@@ -143,10 +155,14 @@ def fund_additional_data(url:str) -> dict:
             sector_focus = pill_list
         elif counter == 6:
             countries_invest_in = pill_list
-        
+
         counter += 1
 
     partner_names.pop(0)
+    print(f"Processed additional data sections for URL: {url}")
+
+    # Ensure the number of partner names and links match
+    assert len(partner_names) == len(partner_links), f"Mismatch in partner names ({len(partner_names)}) and links ({len(partner_links)}) for URL: {url}"
 
     return {
         "contact": fund_contact.text.strip() if fund_contact else None,

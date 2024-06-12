@@ -9,6 +9,7 @@ from src.utils.constants import SEARCH_URL
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 
 def move_down(url:str, scroll_count: int) -> BeautifulSoup:
@@ -28,9 +29,7 @@ def move_down(url:str, scroll_count: int) -> BeautifulSoup:
 
     driver.get(url)
 
-    scroll_number = scroll_count
-
-    for _ in range(scroll_number):
+    for _ in range(scroll_count):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(4)  
 
