@@ -129,7 +129,7 @@ def new_investor(db: Session = Depends(get_db)) -> JSONResponse:
     """
     investors = get_investor_info()
 
-    create_bulk_investors(db=db, crm_investors=investors)
+    create_bulk_crm_investors(db=db, crm_investors=investors)
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 

@@ -129,12 +129,12 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
                 print(f"FundSector association created: fund_id={fund_id}, sector_id={sector.id}")
         fund_id += 1
 
-    fund_id = 1
+    partner_id = 1
 
     print("Updating partner links...")
     for partner_links_group in partner_links:
         for partner_link in partner_links_group:
-            partner = db.query(Partner).filter(Partner.id == fund_id).first()
+            partner = db.query(Partner).filter(Partner.id == partner_id).first()
             
             if partner:
                 partner.vc_link = partner_link
@@ -142,9 +142,11 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
                 db.refresh(partner)
                 print(f"Partner link updated for partner_id={fund_id}, vc_link={partner_link}")
             
-            fund_id += 1
+            partner_id += 1
+
     
     print("--- %s seconds ---" % (time.time() - start_time))
+
 
 def get_all_funds(db: Session, page: int, limit: int):
     """
