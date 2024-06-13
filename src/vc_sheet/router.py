@@ -11,7 +11,7 @@ vc_sheet_router = APIRouter()
 # FUND ROUTES
 
 @vc_sheet_router.get("/vc_sheet/funds", tags=["vc_sheet"])
-def get_funds(db: Session = Depends(get_db), page: int = 0, limit: int = 10):
+def get_funds(db: Session = Depends(get_db), page: int = 1, limit: int = 10):
     """
     Retrieve a list of venture capital funds.
 
@@ -23,7 +23,26 @@ def get_funds(db: Session = Depends(get_db), page: int = 0, limit: int = 10):
     Returns:
         JSONResponse: A JSON response containing the list of funds.
     """
-    return get_all_funds(db=db, page=page, limit=limit)
+    
+
+    return dict(page=page, limit=limit, total=total_funds(db=db), data=get_all_funds(db=db, page=page, limit=limit))
+
+
+@vc_sheet_router.get("/vc_sheet/funds/countries/{fund_id}", tags=["vc_sheet"])
+def get_countries_fund_invest(db: Session = Depends(get_db), fund_id: int = 1):
+    """
+    Retrieve a list of countries where a specific venture capital fund has invested.
+
+    Args:
+        db (Session, optional): Database session dependency.
+        fund_id (int, optional): The unique identifier of the fund.
+
+    Returns:
+        JSONResponse: A JSON response containing the list of countries where the fund has invested.
+    """
+
+    return get_fund_countries_invest(db=db, fund_id=fund_id)
+
 
 
 @vc_sheet_router.get("/vc_sheet/funds/{fund_id}", tags=["vc_sheet"])
