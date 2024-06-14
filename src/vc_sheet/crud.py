@@ -129,20 +129,20 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
                 print(f"FundSector association created: fund_id={fund_id}, sector_id={sector.id}")
         fund_id += 1
 
-    partner_id = 1
+    
 
     print("Updating partner links...")
     for partner_links_group in partner_links:
         for partner_link in partner_links_group:
-            partner = db.query(Partner).filter(Partner.id == partner_id).first()
+
+            name = partner_link.split("/who/")[1].replace("-", " ").title()
+            partner = db.query(Partner).filter(Partner.name == name).first()
             
             if partner:
                 partner.vc_link = partner_link
                 db.commit()
                 db.refresh(partner)
                 print(f"Partner link updated for partner_id={fund_id}, vc_link={partner_link}")
-            
-            partner_id += 1
 
     
     print("--- %s seconds ---" % (time.time() - start_time))
@@ -172,25 +172,34 @@ def add_partners_information(db: Session):
     Returns:
         None
     """
-    partner_id = 1
+    partner_id = 550
 
-    for _ in range(2588):
+    for _ in range(partner_id, 2588):
         partner = db.query(Partner).filter(Partner.id == partner_id).first()
 
-        partner_dict = vc_scraper_partners(partner.vc_link)
 
-        partner.linkedin = partner_dict["linkedin"]
-        partner.twitter = partner_dict["twitter"]
-        partner.email = partner_dict["email"]
-        partner.description = partner_dict["description"]
-        partner.photo = partner_dict["photo"]
-        partner.role = partner_dict["role"]
-        partner.crunch_base = partner_dict["crunch_base"]
-        partner.website = partner_dict["website"]
-        db.commit()
-        db.refresh(partner)
-        print(f"added: {partner_id} partner")
-        partner_id += 1
+        if partner:
+
+            try:
+                partner_dict = vc_scraper_partners(partner.vc_link)
+
+                
+
+                partner.linkedin = partner_dict["linkedin"]
+                partner.twitter = partner_dict["twitter"]
+                partner.email = partner_dict["email"]
+                partner.description = partner_dict["description"]
+                partner.photo = partner_dict["photo"]
+                partner.role = partner_dict["role"]
+                partner.crunch_base = partner_dict["crunch_base"]
+                partner.website = partner_dict["website"]
+                db.commit()
+                db.refresh(partner)
+                print(f"added: {partner_id} partner")
+                partner_id += 1
+            except:
+                print(f"error: {partner_id} partner")
+                partner_id += 1
 
 def get_all_partners(db: Session, page: int, limit: int):
     """

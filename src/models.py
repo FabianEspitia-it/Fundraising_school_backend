@@ -6,6 +6,16 @@ from sqlalchemy.orm import relationship
 from src.database import engine, Base
 
 
+class UserFundFavorite(Base):  
+    __tablename__ = 'user_fund_favorites'
+
+    user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
+    fund_id = Column(Integer, ForeignKey('vc_fund.id'), primary_key=True)
+
+    user = relationship("User", foreign_keys=[user_id], overlaps="funds")
+    fund = relationship("Fund", foreign_keys=[fund_id], overlaps="users")
+
+
 class FundSector(Base):
     __tablename__ = 'fund_sectors'
 
@@ -144,6 +154,8 @@ class User(Base):
     education = relationship("Education", back_populates="user")
     experience = relationship("Experience", back_populates="user")
 
+    funds = relationship("Fund", secondary="user_fund_favorites", back_populates="users", overlaps="fund")
+
 
 class Education(Base):
     __tablename__ = "education"
@@ -225,6 +237,7 @@ class Fund(Base):
     partners = relationship("Partner", secondary="fund_partners", back_populates='funds', overlaps="partner")
     sectors = relationship("Sector", secondary="fund_sectors", back_populates='funds', overlaps="sector")
     check_size = relationship("CheckSize", secondary="fund_check_size", back_populates='funds', overlaps="check_size")
+    users = relationship("User", secondary="user_fund_favorites", back_populates='funds', overlaps="user")
 
 
 class CrmInvestorInvestRange(Base):

@@ -35,7 +35,12 @@ def update_round_info_user_by_email(db: Session, email: str, seeking_capital: bo
 
 
 def create_user_principal_data(db: Session, new_user: NewUserReq) -> int:
-    user = models.User(first_name = new_user.name.split()[0], email=new_user.email, photo_url=new_user.linkedin_picture)
+    user_first_name = new_user.name.split()[0]
+    user = models.User(
+        first_name=user_first_name,
+        email=new_user.email,
+        photo_url=new_user.linkedin_picture
+    )
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -59,3 +64,11 @@ def create_bulk_education(db: Session, education: list[models.Education]) -> Non
 def create_bulk_experience(db: Session, experiences: list[models.Experience]) -> None:
     db.add_all(experiences)
     db.commit()
+
+def add_favorite_fund_to_user(db: Session, email: str, fund_id: int) -> None:
+    user = get_user_by_email(db, email)
+    user_fund = models.UserFundFavorite(user_id=user.id, fund_id=fund_id)
+    db.add(user_fund)
+    db.commit()
+    db.refresh(user_fund)
+

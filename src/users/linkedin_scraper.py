@@ -144,6 +144,7 @@ def user_scraper(db: Session, req: NewUserReq) -> None:
 
     linkedin_url = search_linkedin_url(req.name)
     if not linkedin_url:
+        print("Aqwui")
         create_user_principal_data(db, user)
         return None
 
@@ -151,6 +152,7 @@ def user_scraper(db: Session, req: NewUserReq) -> None:
 
     user_public_identifier = linkedin_public_identifier(linkedin_url)
     if not user_public_identifier:
+        print("Aqwui")
         create_user_principal_data(db, user)
         return None
     

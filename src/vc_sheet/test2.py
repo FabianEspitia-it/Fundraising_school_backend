@@ -47,6 +47,11 @@ def fund_additional_data(url:str) -> dict:
     all_sections = soup.find_all("div", class_="quick-view-row")
     fund_contact = soup.find("div", class_="quick-deal-response right")
     fund_location = soup.find_all("div", class_="quick-deal-response")
+    fund_websites = soup.find("div", class_="align-buttons")
+    fund_website = fund_websites.find("a", class_="button link-out-button in-line w-inline-block")["href"] if fund_websites.find("a", class_="button link-out-button in-line w-inline-block") else None
+    fund_linkedin = fund_websites.find("a", class_="list-card contact-card linkedin w-inline-block")["href"] if fund_websites.find("a", class_="list-card contact-card linkedin w-inline-block") else None
+    fund_twitter = fund_websites.find("a", class_="list-card contact-card twitter dm w-inline-block")["href"] if fund_websites.find("a", class_="list-card contact-card twitter dm w-inline-block") else None
+    fund_crunchbase = fund_websites.find("a", class_="list-card contact-card crunchbase w-inline-block")["href"] if fund_websites.find("a", class_="list-card contact-card crunchbase w-inline-block") else None
     final_fund_location = "".join([div.text.strip() for div in fund_location if "right" not in div.get("class", [])])
     check_size_range = []
     lead_in = []
@@ -93,6 +98,10 @@ def fund_additional_data(url:str) -> dict:
         "lead_in": lead_in,
         "sector_focus": sector_focus,
         "countries_invest_in": countries_invest_in,
+        "fund_website": fund_website,
+        "fund_linkedin": fund_linkedin,
+        "fund_twitter": fund_twitter,
+        "fund_crunchbase": fund_crunchbase,
         "partner_names": partner_names,
         "partner_links": [link.get("href") for link in partner_links],
     }

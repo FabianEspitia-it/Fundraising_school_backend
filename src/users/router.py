@@ -198,3 +198,32 @@ def user_new(new_user: NewUserReq, background_tasks: BackgroundTasks, db: Sessio
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
+@user.post("/user/favorite_fund" , tags=["users"])
+def add_favorite_fund(email: str, fund_id: int, db: Session = Depends(get_db)):
+    """
+    Add a favorite fund to a user's profile.
+
+    Args:
+        email (str): The email address of the user.
+        fund_id (int): The unique identifier of the fund to add to the user's profile.
+        db (Session): The database session dependency.
+
+    Returns:
+        JSONResponse: A JSON response indicating that the favorite fund was added.
+
+    Raises:
+        HTTPException: If the email is invalid (status code 400).
+        HTTPException: If the user is not found (status code 404).
+        HTTPException: If the fund is not found (status code 404).
+    """
+    if not check_email(email):
+        raise HTTPException(status_code=400, detail="Invalid Email")
+
+    user_record = get_user_by_email(db, email=email)
+    if not user_record:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    add_favorite_fund_to_user(db, user_record.id, fund_id)
+
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
