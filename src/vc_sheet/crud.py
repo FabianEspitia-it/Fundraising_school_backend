@@ -315,8 +315,6 @@ def add_partners_information(db: Session):
             try:
                 partner_dict = vc_scraper_partners(partner.vc_link)
 
-                
-
                 partner.linkedin = partner_dict["linkedin"]
                 partner.twitter = partner_dict["twitter"]
                 partner.email = partner_dict["email"]
