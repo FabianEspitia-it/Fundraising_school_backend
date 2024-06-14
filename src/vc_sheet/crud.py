@@ -305,7 +305,7 @@ def add_partners_information(db: Session):
     Returns:
         None
     """
-    partner_id = 550
+    partner_id = 1
 
     for _ in range(partner_id, 2588):
         partner = db.query(Partner).filter(Partner.id == partner_id).first()
