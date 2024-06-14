@@ -5,6 +5,7 @@ from src.users.schemas import NewUserReq
 import src.models as models
 
 
+
 def get_user_by_email(db: Session, email: str) -> models.User:
     return db.query(models.User).filter(models.User.email == email).first()
 
@@ -64,11 +65,31 @@ def create_bulk_education(db: Session, education: list[models.Education]) -> Non
 def create_bulk_experience(db: Session, experiences: list[models.Experience]) -> None:
     db.add_all(experiences)
     db.commit()
+    
 
 def add_favorite_fund_to_user(db: Session, email: str, fund_id: int) -> None:
     user = get_user_by_email(db, email)
-    user_fund = models.UserFundFavorite(user_id=user.id, fund_id=fund_id)
-    db.add(user_fund)
-    db.commit()
-    db.refresh(user_fund)
+    if user:
+        user_fund = models.UserFundFavorite(user_id=user.id, fund_id=fund_id)
+        db.add(user_fund)
+        db.commit()
+        db.refresh(user_fund)
+    else:
+        raise Exception("User not found")
+
+
+def get_favorite_funds_by_user_id(db: Session, email: str) -> list[models.Fund]:
+
+    query = db.query(models.Fund).join(models.UserFundFavorite).join(models.User).filter(models.User.email == email).all()
+
+    return query
+
+
+def delete_favorite_fund_by_user_id(db: Session, email: str, fund_id: int) -> None:
+    user = get_user_by_email(db, email)
+    if user:
+        db.query(models.UserFundFavorite).filter(models.UserFundFavorite.user_id == user.id, models.UserFundFavorite.fund_id == fund_id).delete()
+        db.commit()
+    else:
+        raise Exception("User not found")
 

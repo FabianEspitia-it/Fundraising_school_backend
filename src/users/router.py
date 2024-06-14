@@ -1,5 +1,9 @@
 from fastapi import APIRouter, status, Depends, BackgroundTasks, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse
+
+import pandas as pd
+import os
 
 from src.database import get_db
 from src.users.linkedin_scraper import user_scraper
@@ -143,6 +147,7 @@ def update_contact_user_info(image_user: ImageUserReq, db: Session = Depends(get
 
     return JSONResponse(content={"response": "updated"}, status_code=status.HTTP_200_OK)
 
+
 @user.post("/user/round", tags=["users"])
 def update_round_user_info(round_user: RoundUserReq, db: Session = Depends(get_db)):
     """
@@ -198,6 +203,7 @@ def user_new(new_user: NewUserReq, background_tasks: BackgroundTasks, db: Sessio
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
+
 @user.post("/user/favorite_fund" , tags=["users"])
 def add_favorite_fund(email: str, fund_id: int, db: Session = Depends(get_db)):
     """
@@ -211,10 +217,29 @@ def add_favorite_fund(email: str, fund_id: int, db: Session = Depends(get_db)):
     Returns:
         JSONResponse: A JSON response indicating that the favorite fund was added.
 
+    """
+
+    add_favorite_fund_to_user(db, email, fund_id)
+
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+
+@user.get("/user/favorite_fund/csv/{email}", tags=["users"])
+def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
+    """
+    Retrieve a CSV file containing the favorite funds of a user.
+
+    Args:
+        email (str): The email address of the user.
+        db (Session): The database session dependency.
+
+    Returns:
+        FileResponse: A CSV file containing the favorite funds of the user.
+
     Raises:
         HTTPException: If the email is invalid (status code 400).
         HTTPException: If the user is not found (status code 404).
-        HTTPException: If the fund is not found (status code 404).
+        HTTPException: If no favorite funds are found for the user (status code 404).
     """
     if not check_email(email):
         raise HTTPException(status_code=400, detail="Invalid Email")
@@ -222,8 +247,43 @@ def add_favorite_fund(email: str, fund_id: int, db: Session = Depends(get_db)):
     user_record = get_user_by_email(db, email=email)
     if not user_record:
         raise HTTPException(status_code=404, detail="User not found")
+    
+    favorite_funds = get_favorite_funds_by_user_id(db, email=email)
+    
+    if not favorite_funds:
+        raise HTTPException(status_code=404, detail="No favorite funds found for this user.")
+    
+    df = pd.DataFrame([fund.__dict__ for fund in favorite_funds])
+    df = df.drop(columns=['_sa_instance_state'])  
+    
+    
+    download_folder = os.path.join(os.path.expanduser("~"), "Descargas")
+    os.makedirs(download_folder, exist_ok=True)
+    file_path = os.path.join(download_folder, "favorite_funds.csv")
+    
+    df.to_csv(file_path, index=False)
+    
+    return FileResponse(path=file_path, filename="favorite_funds.csv", media_type="text/csv")
 
-    add_favorite_fund_to_user(db, user_record.id, fund_id)
+@user.delete("/user/favorite_fund/{email}/{fund_id}", tags=["users"])
+def delete_favorite_fund(email: str, fund_id: int, db: Session = Depends(get_db)):
+    """
+    Delete a favorite fund from a user's profile.
 
-    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+    Args:
+        email (str): The email address of the user.
+        fund_id (int): The unique identifier of the fund to delete from the user's profile.
+        db (Session): The database session dependency.
 
+    Returns:
+        JSONResponse: A JSON response indicating that the favorite fund was deleted.
+
+    Raises:
+        HTTPException: If the email is invalid (status code 400).
+    """
+    if not check_email(email):
+        raise HTTPException(status_code=400, detail="Invalid Email")
+
+    delete_favorite_fund_by_user_id(db, email, fund_id)
+
+    return JSONResponse(content={"response": "deleted"}, status_code=status.HTTP_200_OK)
