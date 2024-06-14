@@ -59,8 +59,6 @@ class FundBase(BaseModel):
     contact: str
 
 
-
-
 class Fund(FundBase):
     rounds: List[Round] = []
     partners: List[Partner] = []
