@@ -148,7 +148,86 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
     print("--- %s seconds ---" % (time.time() - start_time))
 
 
-def get_all_funds(db: Session, page: int, limit: int):
+def total_funds(db: Session, country: str | None = None, sector: str | None = None, check_size: str | None = None, round_op: str | None = None):
+    """
+    Retrieves the total number of funds in the database.
+
+    Args:
+        db (Session): Database session object.
+
+    Returns:
+        int: Total number of funds.
+    """
+
+    fund = db.query(Fund)
+    if country:
+        fund = fund.join(Fund.countries).filter(Country.name == country)
+
+    if sector:
+        fund = fund.join(Fund.sectors).filter(Sector.name == sector)
+
+    if check_size:
+        fund = fund.join(Fund.check_size).filter(CheckSize.size == check_size)
+
+    if round_op:
+        fund = fund.join(Fund.rounds).filter(Round.stage == round_op)
+
+    return fund.count()
+
+
+def get_countries(db: Session) -> list[Country]:
+    """
+    Retrieves all countries from the database.
+
+    Args:
+        db (Session): Database session object.
+
+    Returns:
+        list[str]: List of Country objects.
+    """
+    return db.query(Country).all()
+
+
+def get_sectors(db: Session) -> list[Sector]:
+    """
+    Retrieves all sectors from the database.
+
+    Args:
+        db (Session): Database session object.
+
+    Returns:
+        list[str]: List of Sector objects.
+    """
+    return db.query(Sector).all()
+
+
+def get_rounds(db: Session) -> list[Round]:
+    """
+    Retrieves all rounds from the database.
+
+    Args:
+        db (Session): Database session object.
+
+    Returns:
+        list[str]: List of Round objects.
+    """
+    return db.query(Round).all()
+
+
+def get_check_sizes(db: Session) -> list[CheckSize]:
+    """
+    Retrieves all check sizes from the database.
+
+    Args:
+        db (Session): Database session object.
+
+    Returns:
+        list[str]: List of CheckSize objects.
+    """
+    return db.query(CheckSize).all()
+
+
+def get_all_funds(db: Session, page: int, limit: int, country: str | None = None, sector: str | None = None, check_size: str | None = None, round_op: str | None = None):
     """
     Retrieves all funds from the database with pagination.
 
@@ -156,11 +235,65 @@ def get_all_funds(db: Session, page: int, limit: int):
         db (Session): Database session object.
         page (int): Page number for pagination.
         limit (int): Number of records per page.
+        country (str, optional): Country to filter by.
+        sector (str, optional): Sector to filter by.
+        check_size (str, optional): Check size to filter by.
+        round_op (str, optional): Round to filter by.
 
     Returns:
         list[Fund]: List of Fund objects.
     """
-    return db.query(Fund).offset(page * 10).limit(limit).all()
+
+    # Create the initial query with joinedload options
+    query = db.query(Fund).options(
+        joinedload(Fund.rounds),
+        joinedload(Fund.partners),
+        joinedload(Fund.check_size),
+        joinedload(Fund.countries),
+        joinedload(Fund.sectors)
+    )
+
+    # Apply filters before pagination
+    if country:
+        print("Country filter applied", country)
+
+        query = query.join(Fund.countries).filter(Country.name == country)
+
+    if sector:
+        print("Sector filter applied", sector)
+
+        query = query.join(Fund.sectors).filter(Sector.name == sector)
+
+    if check_size:
+        print("Check size filter applied", check_size)
+
+        query = query.join(Fund.check_size).filter(CheckSize.size == check_size)
+
+    if round_op:
+        print("Round filter applied", round_op)
+
+        query = query.join(Fund.rounds).filter(Round.stage == round_op)
+
+    # Apply pagination after filters
+    query = query.offset((page - 1) * limit).limit(limit)
+
+    return query.all()
+
+
+def get_fund_countries_invest(db: Session, fund_id: int) -> list[str]:
+    """
+    Retrieves the names of the countries where a specific fund has invested.
+
+    Args:
+        db (Session): Database session object.
+        fund_id (int): ID of the fund to retrieve countries for.
+
+    Returns:
+        list[str]: List of country names.
+    """
+    country_names = db.query(Country.name).join(FundCountry).filter(FundCountry.fund_id == fund_id).all()
+    return [country_name[0] for country_name in country_names]
+
 
 def add_partners_information(db: Session):
     """
@@ -176,7 +309,6 @@ def add_partners_information(db: Session):
 
     for _ in range(partner_id, 2588):
         partner = db.query(Partner).filter(Partner.id == partner_id).first()
-
 
         if partner:
 
@@ -197,6 +329,7 @@ def add_partners_information(db: Session):
                 db.refresh(partner)
                 print(f"added: {partner_id} partner")
                 partner_id += 1
+            
             except:
                 print(f"error: {partner_id} partner")
                 partner_id += 1
