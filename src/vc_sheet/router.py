@@ -49,6 +49,7 @@ def get_fund(fund_id: int, db: Session = Depends(get_db)):
 
     return fund
 
+
 @vc_sheet_router.post("/vc_sheet/funds/add", tags=["vc_sheet"])
 def new_fund(db: Session = Depends(get_db)) -> JSONResponse:
     """
