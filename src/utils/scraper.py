@@ -9,7 +9,6 @@ from src.utils.constants import SEARCH_URL
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 
 
 def move_down(url:str, scroll_count: int) -> BeautifulSoup:

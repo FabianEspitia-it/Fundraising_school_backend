@@ -265,6 +265,7 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
     
     return FileResponse(path=file_path, filename="favorite_funds.csv", media_type="text/csv")
 
+
 @user.delete("/user/favorite_fund/{email}/{fund_id}", tags=["users"])
 def delete_favorite_fund(email: str, fund_id: int, db: Session = Depends(get_db)):
     """

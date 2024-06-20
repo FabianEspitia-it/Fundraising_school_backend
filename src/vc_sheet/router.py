@@ -11,7 +11,7 @@ vc_sheet_router = APIRouter()
 # FUND ROUTES
 
 @vc_sheet_router.get("/vc_sheet/funds", tags=["vc_sheet"])
-def get_funds(db: Session = Depends(get_db), page: int = 1, limit: int = 10, country: str | None = None, sector: str | None = None, check_size: str | None = None, round_op: str | None = None):
+def get_funds(db: Session = Depends(get_db), page: int = 0, limit: int = 10, user_email: str = None):
     """
     Retrieve a list of venture capital funds.
 
@@ -23,59 +23,7 @@ def get_funds(db: Session = Depends(get_db), page: int = 1, limit: int = 10, cou
     Returns:
         JSONResponse: A JSON response containing the list of funds.
     """
-    
-    return dict(page=page, limit=limit, total=total_funds(db=db, country=country, sector=sector, check_size=check_size, round_op=round_op), data=get_all_funds(db=db, page=page, limit=limit, country=country, sector=sector, check_size=check_size, round_op=round_op))  
-
-
-@vc_sheet_router.get("/vc_sheet/funds/countries/{fund_id}", tags=["vc_sheet"])
-def get_countries_fund_invest(db: Session = Depends(get_db), fund_id: int = 1):
-    """
-    Retrieve a list of countries where a specific venture capital fund has invested.
-
-    Args:
-        db (Session, optional): Database session dependency.
-        fund_id (int, optional): The unique identifier of the fund.
-
-    Returns:
-        JSONResponse: A JSON response containing the list of countries where the fund has invested.
-    """
-
-    return get_fund_countries_invest(db=db, fund_id=fund_id)
-
-
-@vc_sheet_router.get("/vc_sheet/filter/options", tags=["vc_sheet"])
-def get_filter_options(db: Session = Depends(get_db)):
-    """
-    Retrieve the filter options for the venture capital funds.
-
-    Args:
-        db (Session, optional): Database session dependency.
-
-    Returns:
-        JSONResponse: A JSON response containing the filter options.
-    """
-    countries: list[str] = []
-    countries_db = get_countries(db=db)
-    for country in countries_db:
-        countries.append(country.name)
-
-
-    sectors: list[str] = []
-    sectors_db = get_sectors(db=db)
-    for sector in sectors_db:
-        sectors.append(sector.name)
-
-    check_size: list[str] = []
-    check_size_db = get_check_sizes(db=db)
-    for size in check_size_db:
-        check_size.append(size.size)
-
-    rounds: list[str] = []
-    rounds_db = get_rounds(db=db)
-    for round in rounds_db:
-        rounds.append(round.stage)    
-
-    return dict(countries=countries, sectors=sectors, check_size=check_size, rounds=rounds)
+    return get_all_funds(db=db, page=page, limit=limit, user_email=user_email )
 
 
 @vc_sheet_router.get("/vc_sheet/funds/{fund_id}", tags=["vc_sheet"])
@@ -184,6 +132,9 @@ def new_investor(db: Session = Depends(get_db)) -> JSONResponse:
     create_bulk_crm_investors(db=db, crm_investors=investors)
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+
+
 
 """
 ROUTES THAT WE DONT NEED AT THE MOMENT
