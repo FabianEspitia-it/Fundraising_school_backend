@@ -1,14 +1,15 @@
 from fastapi import APIRouter, status, Depends, BackgroundTasks, HTTPException
 from fastapi.responses import JSONResponse
-from fastapi.responses import FileResponse
+from starlette.responses import StreamingResponse
+
 
 import pandas as pd
-import os
+import io
 
 from src.database import get_db
 from src.users.linkedin_scraper import user_scraper
 
-from src.users.schemas import ContactUserReq, ImageUserReq, NewUserReq, RoundUserReq
+from src.users.schemas import ContactUserReq, FavFundReq, ImageUserReq, NewUserReq, RoundUserReq
 from src.users.crud import *
 
 from src.utils.validations import check_email
@@ -205,7 +206,7 @@ def user_new(new_user: NewUserReq, background_tasks: BackgroundTasks, db: Sessio
 
 
 @user.post("/user/favorite_fund" , tags=["users"])
-def add_favorite_fund(email: str, fund_id: int, db: Session = Depends(get_db)):
+def add_favorite_fund(data: FavFundReq, db: Session = Depends(get_db)):
     """
     Add a favorite fund to a user's profile.
 
@@ -219,9 +220,20 @@ def add_favorite_fund(email: str, fund_id: int, db: Session = Depends(get_db)):
 
     """
 
-    add_favorite_fund_to_user(db, email, fund_id)
+
+    fund = get_favorite_fund_by_user_id(db, data.email, data.fund_id)
+
+    if fund:
+        print("already exists", fund.fund_id, data.email)
+        return JSONResponse(content={"response": "already exists"}, status_code=status.HTTP_200_OK)
+
+    try:
+        add_favorite_fund_to_user(db, data.email, data.fund_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid data request")
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
 
 
 @user.get("/user/favorite_fund/csv/{email}", tags=["users"])
@@ -234,7 +246,7 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
         db (Session): The database session dependency.
 
     Returns:
-        FileResponse: A CSV file containing the favorite funds of the user.
+        StreamingResponse: A CSV file containing the favorite funds of the user.
 
     Raises:
         HTTPException: If the email is invalid (status code 400).
@@ -254,16 +266,15 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No favorite funds found for this user.")
     
     df = pd.DataFrame([fund.__dict__ for fund in favorite_funds])
-    df = df.drop(columns=['_sa_instance_state'])  
-    
-    
-    download_folder = os.path.join(os.path.expanduser("~"), "Descargas")
-    os.makedirs(download_folder, exist_ok=True)
-    file_path = os.path.join(download_folder, "favorite_funds.csv")
-    
-    df.to_csv(file_path, index=False)
-    
-    return FileResponse(path=file_path, filename="favorite_funds.csv", media_type="text/csv")
+    df = df.drop(columns=['_sa_instance_state'])
+
+    # Using BytesIO to save the CSV in memory
+    buffer = io.BytesIO()
+    df.to_csv(buffer, index=False)
+    buffer.seek(0)
+
+    return StreamingResponse(buffer, media_type="text/csv", headers={"Content-Disposition": "attachment;filename=favorite_funds.csv"})
+
 
 
 @user.delete("/user/favorite_fund/{email}/{fund_id}", tags=["users"])
